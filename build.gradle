@@ -46,6 +46,7 @@ tasks.named('sonar').configure {
 
 spotless {
 	java {
+		target 'src/*/java/**/*.java'
 		importOrder()
 		removeUnusedImports()
 		cleanthat()
