@@ -1,1 +1,2 @@
-
+app:
+  threadPoolSize: 5

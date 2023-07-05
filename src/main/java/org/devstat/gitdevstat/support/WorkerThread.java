@@ -1,8 +1,11 @@
 package org.devstat.gitdevstat.support;
 
+import org.devstat.gitdevstat.dto.JobResult;
 import org.slf4j.Logger;
 
-public class WorkerThread implements Runnable {
+import java.util.concurrent.Callable;
+
+public class WorkerThread implements Callable<JobResult> {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(WorkerThread.class);
 
     private IWorkerThreadJob job;
@@ -12,10 +15,11 @@ public class WorkerThread implements Runnable {
     }
 
     @Override
-    public void run() {
+    public JobResult call() {
         log.info(  "{} Starting...",Thread.currentThread().getName());
-        job.processCommand();
+        var res = job.processCommand();
         log.info(  "{} Finished",Thread.currentThread().getName());
+        return res;
     }
 
 }

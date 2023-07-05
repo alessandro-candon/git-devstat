@@ -1,28 +1,47 @@
 package org.devstat.gitdevstat.support;
 
+import org.devstat.gitdevstat.AppProperties;
+import org.devstat.gitdevstat.dto.JobResult;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 public class ThreadExecutor {
+
+    AppProperties appProperties;
+
+    public ThreadExecutor(AppProperties appProperties) {
+        this.appProperties = appProperties;
+
+    }
+
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ThreadExecutor.class);
 
-    public List<String> execute(IWorkerThreadJob aJob) {
-        ExecutorService executor = Executors.newFixedThreadPool(5);
-        for (int i = 0; i < 10; i++) {
-            Runnable worker = new WorkerThread(aJob);
-            executor.execute(worker);
+    public List<JobResult> execute(List<IWorkerThreadJob> jobs) {
+        ExecutorService executor = Executors.newFixedThreadPool(appProperties.threadPoolSize());
+
+        List<Future<JobResult>> futures = new ArrayList<>();
+        for (IWorkerThreadJob aJob : jobs) {
+            futures.add(executor.submit(new WorkerThread(aJob)));
         }
         executor.shutdown();
 
-        while (!executor.isTerminated()) {
-        }
+        List<JobResult>  ret = futures.stream().map(job -> {
+            try {
+                return job.get();
+            } catch (InterruptedException | ExecutionException ex) {
+                throw new RuntimeException(ex);
+            }
+        }).toList();
 
         log.info("Finished all threads");
-        return List.of("1","...","10");
+        return ret;
     }
 }
