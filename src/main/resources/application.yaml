@@ -1,2 +1,7 @@
 app:
   threadPoolSize: 5
+  github:
+    baseUrl: "https://api.github.com"
+    org: "myorganization"
+    pat: "xxx"
+
