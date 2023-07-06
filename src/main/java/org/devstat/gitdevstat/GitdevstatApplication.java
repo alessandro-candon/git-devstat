@@ -11,6 +11,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 @SpringBootApplication
 @ConfigurationPropertiesScan
 public class GitdevstatApplication {
+    private final AppProperties appProperties;
+
+    public GitdevstatApplication(AppProperties appProperties) {
+        this.appProperties = appProperties;
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(GitdevstatApplication.class, args);
