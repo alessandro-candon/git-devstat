@@ -1,9 +1,9 @@
+/* OpenSource 2023 */
 package org.devstat.gitdevstat.support;
 
+import java.util.concurrent.Callable;
 import org.devstat.gitdevstat.dto.JobResult;
 import org.slf4j.Logger;
-
-import java.util.concurrent.Callable;
 
 public class WorkerThread implements Callable<JobResult> {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(WorkerThread.class);
@@ -16,10 +16,9 @@ public class WorkerThread implements Callable<JobResult> {
 
     @Override
     public JobResult call() {
-        log.info(  "{} Starting...",Thread.currentThread().getName());
+        log.info("{} Starting...", Thread.currentThread().getName());
         var res = job.processCommand();
-        log.info(  "{} Finished",Thread.currentThread().getName());
+        log.info("{} Finished", Thread.currentThread().getName());
         return res;
     }
-
 }

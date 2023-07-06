@@ -8,6 +8,8 @@ plugins {
 	id "org.sonarqube" version "4.2.1.3168"
 
 	id 'com.diffplug.spotless' version '6.19.0'
+
+    id 'info.solidsoft.pitest' version '1.9.11'
 }
 
 group = 'org.devstat'
@@ -41,6 +43,11 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+pitest {
+    junit5PluginVersion = '1.1.2'
+    timeoutConstInMillis = 10000
+}
+
 tasks.named('sonar').configure {
 	dependsOn jacocoTestReport
 }
@@ -56,3 +63,10 @@ spotless {
 		licenseHeader '/* OpenSource $YEAR */'
 	}
 }
+
+tasks.register('updateGitHooks', Copy) {
+    from './scripts/pre-commit'
+    into './.git/hooks'
+}
+compileJava.dependsOn updateGitHooks
+
