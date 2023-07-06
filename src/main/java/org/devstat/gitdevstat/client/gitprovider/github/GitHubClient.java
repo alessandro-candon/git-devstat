@@ -2,14 +2,16 @@ package org.devstat.gitdevstat.client.gitprovider.github;
 
 import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.client.gitprovider.IGitProviderClient;
-import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryListDto;
+import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.client.gitprovider.github.dto.GithubRepoDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GitHubClient implements IGitProviderClient {
 
@@ -21,7 +23,7 @@ public class GitHubClient implements IGitProviderClient {
     }
 
     @Override
-    public List<RepositoryListDto> getRepositoryList(String teamSlug) {
+    public List<RepositoryDto> getRepositoryList(String teamSlug) {
         GithubRepoDto[] githubRepoDtoList = githubWebClient
                 .get()
                 .uri(
@@ -40,7 +42,11 @@ public class GitHubClient implements IGitProviderClient {
                 .bodyToMono(GithubRepoDto[].class)
                 .block();
 
-        // TODO MAP the list
-        return new ArrayList<RepositoryListDto>();
+        assert githubRepoDtoList != null;
+        return Arrays.stream(githubRepoDtoList).map(githubRepoDto -> new RepositoryDto(
+                githubRepoDto.id(),
+                githubRepoDto.name(),
+                githubRepoDto.fullName()
+        )).collect(Collectors.toList());
     }
 }
