@@ -1,2 +1,10 @@
+spring:
+  main:
+    web-application-type: none
 app:
   threadPoolSize: 10
+  github:
+    baseUrl: "http://localhost:8765"
+    org: "myorganization"
+    pat: "xxx"
+

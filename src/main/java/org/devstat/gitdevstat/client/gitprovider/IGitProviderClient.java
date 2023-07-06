@@ -1,9 +1,9 @@
+/* OpenSource 2023 */
 package org.devstat.gitdevstat.client.gitprovider;
 
+import java.util.List;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 
-import java.util.List;
-
 public interface IGitProviderClient {
-    public List<RepositoryDto> getRepositoryList(String teamSlug);
+    List<RepositoryDto> getRepositoryList(String teamSlug);
 }
