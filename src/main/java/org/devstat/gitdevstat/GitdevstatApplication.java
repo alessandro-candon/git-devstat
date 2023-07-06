@@ -26,6 +26,7 @@ public class GitdevstatApplication {
         return WebClient.builder()
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/vnd.github+json")
                 .defaultHeader("X-GitHub-Api-Version", "2022-11-28")
+                // TODO : USE ENV VARIABLES
                 .defaultHeader("Authorization", "token ".concat("mypersonaltoken"))
                 .build();
     }
