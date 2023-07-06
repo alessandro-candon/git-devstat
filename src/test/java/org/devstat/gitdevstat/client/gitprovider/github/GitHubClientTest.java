@@ -36,7 +36,7 @@ public class GitHubClientTest {
     }
 
     @Test
-    void testGetNetworks() throws IOException, InterruptedException {
+    void testRepositoryList() throws IOException, InterruptedException {
         mockBackEnd.enqueue(
                 new MockResponse()
                         .setBody(StubImporter.getString("GithubRepo.json"))
