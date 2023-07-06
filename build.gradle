@@ -9,7 +9,7 @@ plugins {
 
 	id 'com.diffplug.spotless' version '6.19.0'
 
-	id 'info.solidsoft.pitest' version '1.9.11'
+    id 'info.solidsoft.pitest' version '1.9.11'
 }
 
 group = 'org.devstat'
@@ -29,6 +29,7 @@ ext {
 
 dependencies {
 	implementation 'org.springframework.shell:spring-shell-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
@@ -40,6 +41,11 @@ dependencyManagement {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+pitest {
+    junit5PluginVersion = '1.1.2'
+    timeoutConstInMillis = 10000
 }
 
 tasks.named('sonar').configure {
@@ -58,7 +64,9 @@ spotless {
 	}
 }
 
-pitest {
-	junit5PluginVersion = '1.1.2'
-	timeoutConstInMillis = 10000
+tasks.register('updateGitHooks', Copy) {
+    from './scripts/pre-commit'
+    into './.git/hooks'
 }
+compileJava.dependsOn updateGitHooks
+
