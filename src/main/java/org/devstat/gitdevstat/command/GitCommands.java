@@ -1,15 +1,14 @@
 /* OpenSource 2023 */
 package org.devstat.gitdevstat.command;
 
+import java.util.Collections;
+import java.util.List;
 import org.devstat.gitdevstat.dto.JobResult;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
 import org.devstat.gitdevstat.support.ThreadExecutor;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-
-import java.util.Collections;
-import java.util.List;
 
 @ShellComponent
 public class GitCommands {
@@ -27,10 +26,11 @@ public class GitCommands {
 
     @ShellMethod(key = "runThreads")
     public String runThreads() {
-        IWorkerThreadJob aJob = () -> {
-            //make some work
-            return new JobResult(0,"Job done");
-        };
+        IWorkerThreadJob aJob =
+                () -> {
+                    // make some work
+                    return new JobResult(0, "Job done");
+                };
 
         List<IWorkerThreadJob> jobs = Collections.nCopies(10, aJob);
         List<JobResult> jobRes = threadExecutor.execute(jobs);

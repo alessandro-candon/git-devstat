@@ -8,6 +8,8 @@ plugins {
 	id "org.sonarqube" version "4.2.1.3168"
 
 	id 'com.diffplug.spotless' version '6.19.0'
+
+	id 'info.solidsoft.pitest' version '1.9.11'
 }
 
 group = 'org.devstat'
@@ -54,4 +56,9 @@ spotless {
 		formatAnnotations()
 		licenseHeader '/* OpenSource $YEAR */'
 	}
+}
+
+pitest {
+	junit5PluginVersion = '1.1.2'
+	timeoutConstInMillis = 10000
 }
