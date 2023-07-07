@@ -4,6 +4,5 @@ package org.devstat.gitdevstat.git;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 
 public interface IGitAnalyzer {
-
-    public void clone(RepositoryDto repositoryDto);
+    void clone(RepositoryDto repositoryDto);
 }
