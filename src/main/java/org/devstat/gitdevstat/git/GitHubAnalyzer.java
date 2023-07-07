@@ -8,10 +8,12 @@ import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.springframework.stereotype.Service;
 
+@Service
 public class GitHubAnalyzer implements IGitAnalyzer {
 
-    private AppProperties appProperties;
+    AppProperties appProperties;
 
     public void clone(RepositoryDto repositoryDto) {
         CloneCommand cloneCommand = Git.cloneRepository();
