@@ -25,7 +25,7 @@ public class GitHubClient implements IGitProviderClient {
         this.appProperties = appProperties;
     }
 
-    private RepositoryMapper mapper = Mappers.getMapper(RepositoryMapper.class);
+    private final RepositoryMapper mapper = Mappers.getMapper(RepositoryMapper.class);
 
     @Override
     public List<RepositoryDto> getRepositoryList(String teamSlug) {
@@ -49,7 +49,7 @@ public class GitHubClient implements IGitProviderClient {
 
         assert githubRepoDtoList != null;
 
-        return Arrays.asList(githubRepoDtoList).stream()
+        return Arrays.stream(githubRepoDtoList)
                 .map(mapper::repositoryToGithubRepo)
                 .toList();
     }
