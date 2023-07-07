@@ -49,8 +49,6 @@ public class GitHubClient implements IGitProviderClient {
 
         assert githubRepoDtoList != null;
 
-        return Arrays.stream(githubRepoDtoList)
-                .map(mapper::repositoryToGithubRepo)
-                .toList();
+        return Arrays.stream(githubRepoDtoList).map(mapper::repositoryToGithubRepo).toList();
     }
 }

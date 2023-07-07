@@ -3,25 +3,31 @@ package org.devstat.gitdevstat.command;
 
 import java.util.Collections;
 import java.util.List;
+import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.dto.JobResult;
+import org.devstat.gitdevstat.git.IGitAnalyzer;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
 import org.devstat.gitdevstat.support.ThreadExecutor;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
 
 @ShellComponent
 public class GitCommands {
 
-    public GitCommands(ThreadExecutor threadExecutor) {
+    private IGitAnalyzer gitAnalyzer;
+
+    public GitCommands(ThreadExecutor threadExecutor, IGitAnalyzer gitAnalyzer) {
         this.threadExecutor = threadExecutor;
+        this.gitAnalyzer = gitAnalyzer;
     }
 
     private final ThreadExecutor threadExecutor;
 
-    @ShellMethod(key = "hello-world")
-    public String helloWorld(@ShellOption(defaultValue = "git") String arg) {
-        return "Hello world " + arg;
+    @ShellMethod(key = "run")
+    public String run() {
+        var repositoryDto = new RepositoryDto(123, "", "");
+        gitAnalyzer.clone(repositoryDto);
+        return "Done";
     }
 
     @ShellMethod(key = "runThreads")

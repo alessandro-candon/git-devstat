@@ -18,3 +18,14 @@ Native build and exec (set GraalVM 22.3.2 Java 17 CE):
 ./gradlew nativeCompile
 ./build/native/nativeCompile/gitdevstat
 ```
+
+## Run job
+
+Setup a .env.local like the .env with your personal environment and secrets and run command
+
+```shell
+source .env.local
+```
+
+In this way you have all the variables to run your script.
+
