@@ -23,14 +23,14 @@ public class FsUtil {
     }
 
     public void clearFolder() throws IOException {
-        FileUtils.deleteDirectory(new File(this.workdir));
+        var f = new File(this.workdir);
+        if (f.exists()) {
+            FileUtils.deleteDirectory(f);
+        }
     }
 
     public boolean repoFolderExists(RepositoryDto repositoryDto) {
-        try {
-            return FileUtils.isEmptyDirectory(new File(this.workdir + repositoryDto.name()));
-        } catch (IOException e) {
-            return false;
-        }
+        var f = new File(this.workdir + "/" + repositoryDto.name());
+        return f.isDirectory();
     }
 }

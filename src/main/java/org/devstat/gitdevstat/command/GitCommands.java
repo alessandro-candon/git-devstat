@@ -10,6 +10,7 @@ import org.devstat.gitdevstat.git.IGitAnalyzer;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
 import org.devstat.gitdevstat.support.ThreadExecutor;
 import org.devstat.gitdevstat.utils.FsUtil;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -32,12 +33,13 @@ public class GitCommands {
     @ShellMethod(key = "single-analysis")
     public String singleAnalysis(@ShellOption String repoName, @ShellOption String repoFullName) {
         var repositoryDto = new RepositoryDto(123, repoName, repoFullName);
-        gitAnalyzer.clone(repositoryDto);
-
         try {
+            gitAnalyzer.stat(repositoryDto);
             cleanerUtil.clearFolder();
         } catch (IOException e) {
             return "Error on cleaning, please do it manually";
+        } catch (GitAPIException e) {
+            return "error on Stat";
         }
         return "Done";
     }

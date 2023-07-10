@@ -28,14 +28,16 @@ public class GitHubAnalyzer implements IGitAnalyzer {
     public GitHubAnalyzer(AppProperties appProperties, FsUtil fsUtil) {
         this.appProperties = appProperties;
         this.fs = fsUtil;
-        this.workdir = appProperties.tmpDir() + "/" + APP_NAME;
+        this.workdir = this.appProperties.tmpDir() + "/" + APP_NAME;
     }
 
     public void clone(RepositoryDto repositoryDto) {
+        System.out.println("Cloning");
         CloneCommand cloneCommand = Git.cloneRepository();
         cloneCommand.setURI("https://github.com/".concat(repositoryDto.fullName()));
         cloneCommand.setCredentialsProvider(
                 new UsernamePasswordCredentialsProvider(appProperties.github().pat(), ""));
+
         cloneCommand.setDirectory(
                 new File(appProperties.tmpDir() + "/" + APP_NAME + "/" + repositoryDto.name()));
         try {
@@ -43,12 +45,14 @@ public class GitHubAnalyzer implements IGitAnalyzer {
         } catch (GitAPIException e) {
             throw new RuntimeException(e);
         }
+        System.out.println("End cloning");
     }
 
     public void stat(RepositoryDto repositoryDto) throws IOException, GitAPIException {
         if (!fs.repoFolderExists(repositoryDto)) {
             clone(repositoryDto);
         }
+        System.out.println("Starting writing logs...");
         Repository repository = getExistentGitRepository(repositoryDto);
         Git git = new Git(repository);
         Iterable<RevCommit> commits = git.log().all().call();
@@ -63,7 +67,7 @@ public class GitHubAnalyzer implements IGitAnalyzer {
     public Repository getExistentGitRepository(RepositoryDto repositoryDto) throws IOException {
         FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
         repositoryBuilder.setMustExist(true);
-        repositoryBuilder.setGitDir(new File(this.workdir + "/" + repositoryDto.name()));
+        repositoryBuilder.setGitDir(new File(this.workdir + "/" + repositoryDto.name() + "/.git"));
         return repositoryBuilder.build();
     }
 }

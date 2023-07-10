@@ -6,6 +6,6 @@ app:
   tmpDir: "/tmp"
   github:
     baseUrl: "https://api.github.com"
-    org: "${ORGANIZATION}"
+    org: '${ORGANIZATION}'
     pat: "${GITHUB_TOKEN}"
 
