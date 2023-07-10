@@ -26,16 +26,18 @@ public class NumStatReaderTest extends RepoCleanerSpringBootTest {
         numstat.prepareProcess(repoPath);
         var stats = numstat.read();
 
-        assertNotNull(stats);
-        assertTrue(stats.size() >= 23);
-        assertEquals(10, stats.get("a4ad790872c11a4688d10148b189b3143efd8db3").size());
-
         // log for develop
         for (Map.Entry<String, HashMap<String, NumStatReader.StatInfo>> stat : stats.entrySet()) {
-            System.err.println(stat.getKey());
+            System.err.println("K: " + stat.getKey());
             for (Map.Entry<String, NumStatReader.StatInfo> entryStat : stat.getValue().entrySet()) {
                 System.err.println("---- " + entryStat.getKey() + " * " + entryStat.getValue());
             }
         }
+
+        assertNotNull(stats);
+        assertEquals(3, stats.keySet().size());
+        assertEquals(
+                new NumStatReader.StatInfo(8, 0),
+                stats.get("Cesare Mauri").get("5) src/test/resources/application.yaml"));
     }
 }

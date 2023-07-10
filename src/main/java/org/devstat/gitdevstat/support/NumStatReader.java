@@ -23,13 +23,13 @@ public class NumStatReader {
     private Process proc;
 
     void prepareProcess(String repoPath) throws IOException {
-        final String[] realArgs = {"git", "log", "--pretty=format:commit %H", "--numstat"};
+        final String[] realArgs = {"git", "log", "--pretty=format:commit %cn", "--numstat"};
         proc = Runtime.getRuntime().exec(realArgs, null, new File(repoPath));
         proc.getOutputStream().close();
         proc.getErrorStream().close();
     }
 
-    void onCommit(String commitId, byte[] buf) {
+    void onCommit(int call, String author, byte[] buf) {
         final HashMap<String, StatInfo> files = new HashMap<>();
         final MutableInteger ptr = new MutableInteger();
         while (ptr.value < buf.length) {
@@ -39,17 +39,27 @@ public class NumStatReader {
                             RawParseUtils.parseBase10(buf, ptr.value, ptr),
                             RawParseUtils.parseBase10(buf, ptr.value + 1, ptr));
             final int eol = RawParseUtils.nextLF(buf, ptr.value);
-            final String name = RawParseUtils.decode(UTF_8, buf, ptr.value + 1, eol - 1);
+            final String name =
+                    call + ") " + RawParseUtils.decode(UTF_8, buf, ptr.value + 1, eol - 1);
+
             files.put(name, i);
             ptr.value = eol;
         }
-        stats.put(commitId, files);
+
+        var oldFiles = stats.get(author);
+        if (oldFiles != null) {
+            files.putAll(oldFiles);
+        }
+
+        stats.put(author, files);
     }
 
     HashMap<String, HashMap<String, StatInfo>> read() throws IOException {
+        int call = 0;
+
         if (proc == null) {
             stats.clear();
-            return null;
+            return new HashMap<>();
         }
 
         try (BufferedReader in =
@@ -62,7 +72,7 @@ public class NumStatReader {
                 if (line.startsWith("commit ")) {
                     if (buf != null) {
                         buf.close();
-                        onCommit(commitId, buf.toByteArray());
+                        onCommit(call++, commitId, buf.toByteArray());
                         buf.destroy();
                     }
                     commitId = line.substring("commit ".length());
