@@ -7,36 +7,20 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.io.IOException;
 import org.devstat.gitdevstat.AppProperties;
+import org.devstat.gitdevstat.RepoCleanerSpringBootTest;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
-import org.devstat.gitdevstat.utils.FsUtil;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class GitHubAnalyzerTest {
+class GitHubAnalyzerTest extends RepoCleanerSpringBootTest {
 
     @Autowired AppProperties appProperties;
 
     @Autowired GitHubAnalyzer gitHubAnalyzer;
 
-    @Autowired FsUtil fs;
-
-    @BeforeEach
-    void setUp() throws IOException {
-        fs.clearFolder();
-    }
-
-    @AfterEach
-    void tearDown() throws IOException {
-        fs.clearFolder();
-    }
-
     @Test
-    void testClone() throws IOException {
+    void testClone() {
         var repositoryDto = new RepositoryDto(1, "git-devstat", "alessandro-candon/git-devstat");
         this.gitHubAnalyzer.clone(repositoryDto);
         File f =

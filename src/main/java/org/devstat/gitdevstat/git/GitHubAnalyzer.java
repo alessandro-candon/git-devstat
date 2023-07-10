@@ -15,10 +15,12 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GitHubAnalyzer implements IGitAnalyzer {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(GitHubAnalyzer.class);
 
     private final AppProperties appProperties;
     private final FsUtil fs;
@@ -31,36 +33,38 @@ public class GitHubAnalyzer implements IGitAnalyzer {
         this.workdir = this.appProperties.tmpDir() + "/" + APP_NAME;
     }
 
-    public void clone(RepositoryDto repositoryDto) {
-        System.out.println("Cloning");
+    public String clone(RepositoryDto repositoryDto) {
+        log.info("Cloning repo {}", repositoryDto.name());
         CloneCommand cloneCommand = Git.cloneRepository();
         cloneCommand.setURI("https://github.com/".concat(repositoryDto.fullName()));
         cloneCommand.setCredentialsProvider(
                 new UsernamePasswordCredentialsProvider(appProperties.github().pat(), ""));
 
-        cloneCommand.setDirectory(
-                new File(appProperties.tmpDir() + "/" + APP_NAME + "/" + repositoryDto.name()));
+        String storeDir = appProperties.tmpDir() + "/" + APP_NAME + "/" + repositoryDto.name();
+        cloneCommand.setDirectory(new File(storeDir));
         try {
             cloneCommand.call();
         } catch (GitAPIException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("End cloning");
+        log.debug("End cloning");
+
+        return storeDir;
     }
 
+    // git log --numstat
     public void stat(RepositoryDto repositoryDto) throws IOException, GitAPIException {
         if (!fs.repoFolderExists(repositoryDto)) {
             clone(repositoryDto);
         }
-        System.out.println("Starting writing logs...");
+        log.debug("Starting writing logs...");
         Repository repository = getExistentGitRepository(repositoryDto);
         Git git = new Git(repository);
         Iterable<RevCommit> commits = git.log().all().call();
         int count = 0;
         for (RevCommit commit : commits) {
-            System.out.println("LogCommit: " + commit);
+            log.debug("LogCommit: {} on {}", commit, count);
             count++;
-            System.out.println(count);
         }
     }
 

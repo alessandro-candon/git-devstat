@@ -31,7 +31,9 @@ public class GitCommands {
     private final ThreadExecutor threadExecutor;
 
     @ShellMethod(key = "single-analysis")
-    public String singleAnalysis(@ShellOption String repoName, @ShellOption String repoFullName) {
+    public String singleAnalysis(
+            @ShellOption(defaultValue = "git-devstat") String repoName,
+            @ShellOption(defaultValue = "alessandro-candon/git-devstat") String repoFullName) {
         var repositoryDto = new RepositoryDto(123, repoName, repoFullName);
         try {
             gitAnalyzer.stat(repositoryDto);

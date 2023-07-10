@@ -8,4 +8,7 @@ app:
     baseUrl: "http://localhost:8765"
     org: "myorganization"
     pat: "xxx"
-
+logging:
+  level:
+    org:
+      devstat: DEBUG
