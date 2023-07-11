@@ -90,21 +90,12 @@ public class NumStatReader {
 
     public Map<String, StatInfo> aggregateByAuthor(Map<String, Map<String, StatInfo>> stats) {
         Map<String, StatInfo> ret = new HashMap<>();
-
-        for (String user : stats.keySet()) {
-            for (StatInfo stat : stats.get(user).values()) {
-                StatInfo aggStat = ret.get(user);
-                if (aggStat == null) {
-                    ret.put(user, stat);
-                } else {
-                    ret.put(
-                            user,
-                            new StatInfo(
-                                    aggStat.added() + stat.added(),
-                                    aggStat.deleted() + stat.deleted()));
-                }
-            }
-        }
+        // @spotless:off
+        stats.entrySet()
+                .stream()
+                .forEach(entry -> ret.put(entry.getKey(), stats.get(entry.getKey()).values().stream().
+                        reduce((s1, s2) -> new StatInfo(s1.added() + s2.added(), s1.deleted() + s2.deleted())).orElse(new StatInfo(0,0))));
+        // @spotless:on
         return ret;
     }
 }

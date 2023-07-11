@@ -53,18 +53,22 @@ class NumStatReaderTest extends RepoCleanerSpringBootTest {
                         "1) file1",
                         new NumStatReader.StatInfo(3, 4),
                         "1) file2",
-                        new NumStatReader.StatInfo(0, 1));
+                        new NumStatReader.StatInfo(0, 1),
+                        "3) file2",
+                        new NumStatReader.StatInfo(0, 5));
         Map<String, NumStatReader.StatInfo> e2 =
                 Map.of("2) file1", new NumStatReader.StatInfo(2, 0));
 
         stats.put("User1", e1);
         stats.put("User2", e2);
+        stats.put("User3", Map.of());
 
         var res = numStatReader.aggregateByAuthor(stats);
 
         assertNotNull(res);
-        assertEquals(2, res.size());
-        assertEquals(new NumStatReader.StatInfo(3, 5), res.get("User1"));
+        assertEquals(3, res.size());
+        assertEquals(new NumStatReader.StatInfo(3, 10), res.get("User1"));
         assertEquals(new NumStatReader.StatInfo(2, 0), res.get("User2"));
+        assertEquals(new NumStatReader.StatInfo(0, 0), res.get("User3"));
     }
 }

@@ -70,6 +70,7 @@ spotless {
 		googleJavaFormat().aosp().reflowLongStrings()
 		formatAnnotations()
 		licenseHeader '/* OpenSource $YEAR */'
+		toggleOffOn()
 	}
 }
 
