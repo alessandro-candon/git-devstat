@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.eclipse.jgit.util.MutableInteger;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.TemporaryBuffer;
@@ -89,13 +90,13 @@ public class NumStatReader {
     }
 
     public Map<String, StatInfo> aggregateByAuthor(Map<String, Map<String, StatInfo>> stats) {
-        Map<String, StatInfo> ret = new HashMap<>();
         // @spotless:off
-        stats.entrySet()
-                .stream()
-                .forEach(entry -> ret.put(entry.getKey(), stats.get(entry.getKey()).values().stream().
-                        reduce((s1, s2) -> new StatInfo(s1.added() + s2.added(), s1.deleted() + s2.deleted())).orElse(new StatInfo(0,0))));
+        return stats.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().values().stream()
+                                .reduce((s1, s2) -> new StatInfo(s1.added() + s2.added(), s1.deleted() + s2.deleted()))
+                                .orElse(new StatInfo(0, 0))));
         // @spotless:on
-        return ret;
     }
 }
