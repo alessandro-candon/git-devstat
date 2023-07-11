@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.jgit.util.MutableInteger;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.TemporaryBuffer;
@@ -19,10 +20,10 @@ public class NumStatReader {
 
     public record StatInfo(int added, int deleted) {}
 
-    private final HashMap<String, HashMap<String, StatInfo>> stats = new HashMap<>();
+    private final Map<String, Map<String, StatInfo>> stats = new HashMap<>();
     private Process proc;
 
-    void prepareProcess(String repoPath) throws IOException {
+    public void prepareProcess(String repoPath) throws IOException {
         final String[] realArgs = {"git", "log", "--pretty=format:commit %cn", "--numstat"};
         proc = Runtime.getRuntime().exec(realArgs, null, new File(repoPath));
         proc.getOutputStream().close();
@@ -54,7 +55,7 @@ public class NumStatReader {
         stats.put(author, files);
     }
 
-    HashMap<String, HashMap<String, StatInfo>> read() throws IOException {
+    public Map<String, Map<String, StatInfo>> read() throws IOException {
         int call = 0;
 
         if (proc == null) {
@@ -85,5 +86,25 @@ public class NumStatReader {
         }
         proc = null;
         return stats;
+    }
+
+    public Map<String, StatInfo> aggregateByAuthor(Map<String, Map<String, StatInfo>> stats) {
+        Map<String, StatInfo> ret = new HashMap<>();
+
+        for (String user : stats.keySet()) {
+            for (StatInfo stat : stats.get(user).values()) {
+                StatInfo aggStat = ret.get(user);
+                if (aggStat == null) {
+                    ret.put(user, stat);
+                } else {
+                    ret.put(
+                            user,
+                            new StatInfo(
+                                    aggStat.added() + stat.added(),
+                                    aggStat.deleted() + stat.deleted()));
+                }
+            }
+        }
+        return ret;
     }
 }

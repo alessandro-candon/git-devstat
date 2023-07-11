@@ -8,9 +8,9 @@ import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.dto.JobResult;
 import org.devstat.gitdevstat.git.IGitAnalyzer;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
+import org.devstat.gitdevstat.support.NumStatReader;
 import org.devstat.gitdevstat.support.ThreadExecutor;
 import org.devstat.gitdevstat.utils.FsUtil;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -19,12 +19,17 @@ import org.springframework.shell.standard.ShellOption;
 public class GitCommands {
 
     private final IGitAnalyzer gitAnalyzer;
+    private final NumStatReader numStatReader;
     private final FsUtil cleanerUtil;
 
     public GitCommands(
-            ThreadExecutor threadExecutor, IGitAnalyzer gitAnalyzer, FsUtil cleanerUtil) {
+            ThreadExecutor threadExecutor,
+            IGitAnalyzer gitAnalyzer,
+            NumStatReader numStatReader,
+            FsUtil cleanerUtil) {
         this.threadExecutor = threadExecutor;
         this.gitAnalyzer = gitAnalyzer;
+        this.numStatReader = numStatReader;
         this.cleanerUtil = cleanerUtil;
     }
 
@@ -35,15 +40,20 @@ public class GitCommands {
             @ShellOption(defaultValue = "git-devstat") String repoName,
             @ShellOption(defaultValue = "alessandro-candon/git-devstat") String repoFullName) {
         var repositoryDto = new RepositoryDto(123, repoName, repoFullName);
+
+        var aggResStr = "";
         try {
-            gitAnalyzer.stat(repositoryDto);
+            String repoPath = gitAnalyzer.clone(repositoryDto);
+            numStatReader.prepareProcess(repoPath);
+            var stats = numStatReader.read();
+            var aggRes = numStatReader.aggregateByAuthor(stats);
+            aggResStr = aggRes.toString();
             cleanerUtil.clearFolder();
+
         } catch (IOException e) {
             return "Error on cleaning, please do it manually";
-        } catch (GitAPIException e) {
-            return "error on Stat";
         }
-        return "Done";
+        return aggResStr;
     }
 
     @ShellMethod(key = "runThreads")
