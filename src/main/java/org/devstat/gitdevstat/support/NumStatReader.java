@@ -25,7 +25,12 @@ public class NumStatReader {
     private Process proc;
 
     public void prepareProcess(String repoPath) throws IOException {
-        final String[] realArgs = {"git", "log", "--pretty=format:commit %cn", "--numstat"};
+        final String[] realArgs = {
+            "git",
+            "log",
+            "--pretty=format:commit %h|%an|%aN|%ae|%aE|%al|%aL|%ad|%at|%cn|%ce|%cD|%ct|%f",
+            "--numstat"
+        };
         proc = Runtime.getRuntime().exec(realArgs, null, new File(repoPath));
         proc.getOutputStream().close();
         proc.getErrorStream().close();
@@ -80,6 +85,7 @@ public class NumStatReader {
                     commitId = line.substring("commit ".length());
                     buf = new TemporaryBuffer.LocalFile(null);
                 } else if (buf != null) {
+                    // go to next output of command
                     buf.write(line.getBytes(ISO_8859_1));
                     buf.write('\n');
                 }
