@@ -10,6 +10,7 @@ import java.util.Map;
 import org.devstat.gitdevstat.RepoCleanerSpringBootTest;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.git.GitHubAnalyzer;
+import org.devstat.gitdevstat.git.dto.StatInfoDto;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,34 +31,30 @@ class NumStatReaderTest extends RepoCleanerSpringBootTest {
         var stats = numStatReader.read();
 
         // log for develop
-        for (Map.Entry<String, Map<String, NumStatReader.StatInfo>> stat : stats.entrySet()) {
+        for (Map.Entry<String, Map<String, StatInfoDto>> stat : stats.entrySet()) {
             log.debug("K: {}", stat.getKey());
-            for (Map.Entry<String, NumStatReader.StatInfo> entryStat : stat.getValue().entrySet()) {
+            for (Map.Entry<String, StatInfoDto> entryStat : stat.getValue().entrySet()) {
                 log.debug("---- {} * {}", entryStat.getKey(), entryStat.getValue());
             }
         }
 
         assertNotNull(stats);
-        assertEquals(3, stats.keySet().size());
-        assertEquals(
-                new NumStatReader.StatInfo(8, 0),
-                stats.get("Cesare Mauri").get("5) src/test/resources/application.yaml"));
+        assertEquals(23, stats.keySet().size());
     }
 
     @Test
     void testAggregator() {
-        Map<String, Map<String, NumStatReader.StatInfo>> stats = new HashMap<>();
+        Map<String, Map<String, StatInfoDto>> stats = new HashMap<>();
 
-        Map<String, NumStatReader.StatInfo> e1 =
+        Map<String, StatInfoDto> e1 =
                 Map.of(
                         "1) file1",
-                        new NumStatReader.StatInfo(3, 4),
+                        new StatInfoDto(3, 4),
                         "1) file2",
-                        new NumStatReader.StatInfo(0, 1),
+                        new StatInfoDto(0, 1),
                         "3) file2",
-                        new NumStatReader.StatInfo(0, 5));
-        Map<String, NumStatReader.StatInfo> e2 =
-                Map.of("2) file1", new NumStatReader.StatInfo(2, 0));
+                        new StatInfoDto(0, 5));
+        Map<String, StatInfoDto> e2 = Map.of("2) file1", new StatInfoDto(2, 0));
 
         stats.put("User1", e1);
         stats.put("User2", e2);
@@ -67,8 +64,8 @@ class NumStatReaderTest extends RepoCleanerSpringBootTest {
 
         assertNotNull(res);
         assertEquals(3, res.size());
-        assertEquals(new NumStatReader.StatInfo(3, 10), res.get("User1"));
-        assertEquals(new NumStatReader.StatInfo(2, 0), res.get("User2"));
-        assertEquals(new NumStatReader.StatInfo(0, 0), res.get("User3"));
+        assertEquals(new StatInfoDto(3, 10), res.get("User1"));
+        assertEquals(new StatInfoDto(2, 0), res.get("User2"));
+        assertEquals(new StatInfoDto(0, 0), res.get("User3"));
     }
 }

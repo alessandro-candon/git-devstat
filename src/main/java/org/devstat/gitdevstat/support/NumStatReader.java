@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.devstat.gitdevstat.git.dto.GitAnalysisResultDto;
+import org.devstat.gitdevstat.git.dto.StatInfoDto;
 import org.eclipse.jgit.util.MutableInteger;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.TemporaryBuffer;
@@ -19,16 +21,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class NumStatReader {
 
-    public record StatInfo(int added, int deleted) {}
-
-    private final Map<String, Map<String, StatInfo>> stats = new HashMap<>();
+    private final Map<String, Map<String, StatInfoDto>> stats = new HashMap<>();
     private Process proc;
 
     public void prepareProcess(String repoPath) throws IOException {
         final String[] realArgs = {
             "git",
             "log",
-            "--pretty=format:commit %h|%an|%aN|%ae|%aE|%al|%aL|%ad|%at|%cn|%ce|%cD|%ct|%f",
+            "--pretty=format:commit %h|%an|%ae|%al|%aD|%at|%cn|%ce|%cD|%ct|%f",
             "--numstat"
         };
         proc = Runtime.getRuntime().exec(realArgs, null, new File(repoPath));
@@ -37,12 +37,12 @@ public class NumStatReader {
     }
 
     void onCommit(int call, String author, byte[] buf) {
-        final HashMap<String, StatInfo> files = new HashMap<>();
+        final HashMap<String, StatInfoDto> files = new HashMap<>();
         final MutableInteger ptr = new MutableInteger();
         while (ptr.value < buf.length) {
             if (buf[ptr.value] == '\n') break;
-            StatInfo i =
-                    new StatInfo(
+            StatInfoDto i =
+                    new StatInfoDto(
                             RawParseUtils.parseBase10(buf, ptr.value, ptr),
                             RawParseUtils.parseBase10(buf, ptr.value + 1, ptr));
             final int eol = RawParseUtils.nextLF(buf, ptr.value);
@@ -61,7 +61,32 @@ public class NumStatReader {
         stats.put(author, files);
     }
 
-    public Map<String, Map<String, StatInfo>> read() throws IOException {
+    //    void onCommitWithObj(int call, GitAnalysisResultDto gitAnalysisResultDto, byte[] buf) {
+    //        final HashMap<String, StatInfoWithPathDto> files = new HashMap<>();
+    //        final MutableInteger ptr = new MutableInteger();
+    //        while (ptr.value < buf.length) {
+    //            if (buf[ptr.value] == '\n') break;
+    //            final int eol = RawParseUtils.nextLF(buf, ptr.value);
+    //            final var filePath = RawParseUtils.decode(UTF_8, buf, ptr.value + 1, eol - 1);
+    //
+    //            StatInfoWithPathDto i =
+    //                    new StatInfoWithPathDto(
+    //                            filePath,
+    //                            RawParseUtils.parseBase10(buf, ptr.value, ptr),
+    //                            RawParseUtils.parseBase10(buf, ptr.value + 1, ptr));
+    //            files.put(filePath, i);
+    //            ptr.value = eol;
+    //        }
+    //
+    //        var oldFiles = stats.get(gitAnalysisResultDto.h());
+    //        if (oldFiles != null) {
+    //            files.putAll(oldFiles);
+    //        }
+    //
+    //        stats.put(gitAnalysisResultDto.h(), files);
+    //    }
+
+    public Map<String, Map<String, StatInfoDto>> read() throws IOException {
         int call = 0;
 
         if (proc == null) {
@@ -71,7 +96,8 @@ public class NumStatReader {
 
         try (BufferedReader in =
                 new BufferedReader(new InputStreamReader(proc.getInputStream(), ISO_8859_1))) {
-            String commitId = null;
+            String formattedLineOfCommit = null;
+            GitAnalysisResultDto gitAnalysisResultDto = null;
             TemporaryBuffer buf = null;
             String line;
 
@@ -79,10 +105,14 @@ public class NumStatReader {
                 if (line.startsWith("commit ")) {
                     if (buf != null) {
                         buf.close();
-                        onCommit(call++, commitId, buf.toByteArray());
+                        onCommit(call++, formattedLineOfCommit, buf.toByteArray());
                         buf.destroy();
                     }
-                    commitId = line.substring("commit ".length());
+                    formattedLineOfCommit = line.substring("commit ".length());
+
+                    gitAnalysisResultDto =
+                            new GitAnalysisResultDto.Builder(formattedLineOfCommit).build();
+
                     buf = new TemporaryBuffer.LocalFile(null);
                 } else if (buf != null) {
                     // go to next output of command
@@ -95,14 +125,14 @@ public class NumStatReader {
         return stats;
     }
 
-    public Map<String, StatInfo> aggregateByAuthor(Map<String, Map<String, StatInfo>> stats) {
+    public Map<String, StatInfoDto> aggregateByAuthor(Map<String, Map<String, StatInfoDto>> stats) {
         // @spotless:off
         return stats.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> entry.getValue().values().stream()
-                                .reduce((s1, s2) -> new StatInfo(s1.added() + s2.added(), s1.deleted() + s2.deleted()))
-                                .orElse(new StatInfo(0, 0))));
+                                .reduce((s1, s2) -> new StatInfoDto(s1.added() + s2.added(), s1.deleted() + s2.deleted()))
+                                .orElse(new StatInfoDto(0, 0))));
         // @spotless:on
     }
 }

@@ -1,9 +1,10 @@
 /* OpenSource 2023 */
 package org.devstat.gitdevstat.git.dto;
 
+import java.util.HashMap;
+
 /**
- * This DTO respond to this fomat and informations
- * format:%h|%an|%aN|%ae|%aE|%al|%aL|%ad|%at|%cn|%ce|%cD|%ct|%f
+ * This DTO respond to this fomat and informations format:%h|%an|%ae|%al|%aD|%at|%cn|%ce|%cD|%ct|%f
  *
  * @param h abbreviated commit hash
  * @param an author name
@@ -28,4 +29,34 @@ public record GitAnalysisResultDto(
         String ce,
         String cD,
         int ct,
-        String f) {}
+        String f,
+        HashMap<String, StatInfoDto> statInfoDtoHashMap) {
+
+    public static final class Builder {
+
+        String formattedLog;
+
+        public Builder(String formattedLog) {
+            this.formattedLog = formattedLog;
+        }
+
+        public GitAnalysisResultDto build() {
+
+            var explodedFormattedCommit = this.formattedLog.split("\\|");
+
+            return new GitAnalysisResultDto(
+                    explodedFormattedCommit[0],
+                    explodedFormattedCommit[1],
+                    explodedFormattedCommit[2],
+                    explodedFormattedCommit[3],
+                    explodedFormattedCommit[4],
+                    Integer.parseInt(explodedFormattedCommit[5]),
+                    explodedFormattedCommit[6],
+                    explodedFormattedCommit[7],
+                    explodedFormattedCommit[8],
+                    Integer.parseInt(explodedFormattedCommit[9]),
+                    explodedFormattedCommit[10],
+                    new HashMap<>());
+        }
+    }
+}
