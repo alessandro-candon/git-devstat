@@ -40,17 +40,14 @@ public class GitCommands {
             @ShellOption(defaultValue = "git-devstat") String repoName,
             @ShellOption(defaultValue = "alessandro-candon/git-devstat") String repoFullName) {
         var repositoryDto = new RepositoryDto(123, repoName, repoFullName);
-
-        var aggResStr = "";
         try {
             String repoPath = gitAnalyzer.clone(repositoryDto);
             var stats = numStatReader.getStats(repoPath);
-
             cleanerUtil.clearFolder();
+            return stats.toString();
         } catch (IOException e) {
             return "Error on cleaning, please do it manually";
         }
-        return aggResStr;
     }
 
     @ShellMethod(key = "runThreads")
