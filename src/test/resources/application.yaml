@@ -3,8 +3,12 @@ spring:
     web-application-type: none
 app:
   threadPoolSize: 10
+  tmpDir: '/tmp'
   github:
     baseUrl: "http://localhost:8765"
     org: "myorganization"
     pat: "xxx"
-
+logging:
+  level:
+    org:
+      devstat: DEBUG

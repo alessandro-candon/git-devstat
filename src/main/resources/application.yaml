@@ -3,8 +3,12 @@ spring:
     web-application-type: none
 app:
   threadPoolSize: 5
+  tmpDir: "/tmp"
   github:
     baseUrl: "https://api.github.com"
-    org: "${ORGANIZATION}"
+    org: '${ORGANIZATION}'
     pat: "${GITHUB_TOKEN}"
-
+logging:
+  level:
+    org:
+      devstat: DEBUG
