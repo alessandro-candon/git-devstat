@@ -15,6 +15,8 @@ class GitAnalysisResultDtoTest {
                     + " Jul 2023 12:16:00 +0200|1689070560|Add-netstat-in-main-app";
         var gitAnalysisResultDto = new GitCommitResultDto.Builder(formattedCommit).build();
 
-        assertEquals(gitAnalysisResultDto.h(), "e3696af");
+        assertEquals("e3696af", gitAnalysisResultDto.h());
+        assertEquals(1689070560, gitAnalysisResultDto.at());
+        assertEquals("Add-netstat-in-main-app", gitAnalysisResultDto.f());
     }
 }

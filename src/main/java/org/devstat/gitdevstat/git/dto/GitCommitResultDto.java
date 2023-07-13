@@ -2,6 +2,8 @@
 package org.devstat.gitdevstat.git.dto;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * This DTO respond to this fomat and informations format:%h|%an|%ae|%al|%aD|%at|%cn|%ce|%cD|%ct|%f
@@ -30,7 +32,7 @@ public record GitCommitResultDto(
         String cD,
         int ct,
         String f,
-        HashMap<String, StatInfoWithPathDto> statInfoDtoHashMap) {
+        Map<String, StatInfoWithPathDto> statInfoDtoHashMap) {
 
     public static final class Builder {
 
@@ -42,20 +44,20 @@ public record GitCommitResultDto(
 
         public GitCommitResultDto build() {
 
-            var explodedFormattedCommit = this.formattedLog.split("\\|");
+            StringTokenizer st = new StringTokenizer(formattedLog, "|");
 
             return new GitCommitResultDto(
-                    explodedFormattedCommit[0],
-                    explodedFormattedCommit[1],
-                    explodedFormattedCommit[2],
-                    explodedFormattedCommit[3],
-                    explodedFormattedCommit[4],
-                    Integer.parseInt(explodedFormattedCommit[5]),
-                    explodedFormattedCommit[6],
-                    explodedFormattedCommit[7],
-                    explodedFormattedCommit[8],
-                    Integer.parseInt(explodedFormattedCommit[9]),
-                    explodedFormattedCommit[10],
+                    st.nextToken(),
+                    st.nextToken(),
+                    st.nextToken(),
+                    st.nextToken(),
+                    st.nextToken(),
+                    Integer.parseInt(st.nextToken()),
+                    st.nextToken(),
+                    st.nextToken(),
+                    st.nextToken(),
+                    Integer.parseInt(st.nextToken()),
+                    st.nextToken(),
                     new HashMap<>());
         }
     }
