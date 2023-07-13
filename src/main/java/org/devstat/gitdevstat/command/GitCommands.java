@@ -46,8 +46,6 @@ public class GitCommands {
             String repoPath = gitAnalyzer.clone(repositoryDto);
             numStatReader.prepareProcess(repoPath);
             var stats = numStatReader.read();
-            var aggRes = numStatReader.aggregateByAuthor(stats);
-            aggResStr = aggRes.toString();
             cleanerUtil.clearFolder();
 
         } catch (IOException e) {

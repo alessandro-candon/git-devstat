@@ -18,7 +18,7 @@ import java.util.HashMap;
  * @param ct committer date, UNIX timestamp
  * @param f sanitized subject line, suitable for a filename
  */
-public record GitAnalysisResultDto(
+public record GitCommitResultDto(
         String h,
         String an,
         String ae,
@@ -30,7 +30,7 @@ public record GitAnalysisResultDto(
         String cD,
         int ct,
         String f,
-        HashMap<String, StatInfoDto> statInfoDtoHashMap) {
+        HashMap<String, StatInfoWithPathDto> statInfoDtoHashMap) {
 
     public static final class Builder {
 
@@ -40,11 +40,11 @@ public record GitAnalysisResultDto(
             this.formattedLog = formattedLog;
         }
 
-        public GitAnalysisResultDto build() {
+        public GitCommitResultDto build() {
 
             var explodedFormattedCommit = this.formattedLog.split("\\|");
 
-            return new GitAnalysisResultDto(
+            return new GitCommitResultDto(
                     explodedFormattedCommit[0],
                     explodedFormattedCommit[1],
                     explodedFormattedCommit[2],

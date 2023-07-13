@@ -13,7 +13,7 @@ class GitAnalysisResultDtoTest {
                 "e3696af|Cesare Mauri|cesare.mauri@decathlon.com|cesare.mauri|Tue, 11 Jul 2023"
                     + " 12:16:00 +0200|1689070560|Cesare Mauri|cesare.mauri@decathlon.com|Tue, 11"
                     + " Jul 2023 12:16:00 +0200|1689070560|Add-netstat-in-main-app";
-        var gitAnalysisResultDto = new GitAnalysisResultDto.Builder(formattedCommit).build();
+        var gitAnalysisResultDto = new GitCommitResultDto.Builder(formattedCommit).build();
 
         assertEquals(gitAnalysisResultDto.h(), "e3696af");
     }
