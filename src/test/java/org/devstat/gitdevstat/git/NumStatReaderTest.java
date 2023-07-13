@@ -1,12 +1,12 @@
 /* OpenSource 2023 */
-package org.devstat.gitdevstat.support;
+package org.devstat.gitdevstat.git;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import org.devstat.gitdevstat.RepoCleanerSpringBootTest;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
-import org.devstat.gitdevstat.git.GitHubAnalyzer;
+import org.devstat.gitdevstat.support.WorkerThread;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +22,7 @@ class NumStatReaderTest extends RepoCleanerSpringBootTest {
     void testParseHistory() throws IOException {
         var repositoryDto = new RepositoryDto(1, "git-devstat", "alessandro-candon/git-devstat");
         String repoPath = gitHubAnalyzer.clone(repositoryDto);
-
-        numStatReader.prepareProcess(repoPath);
-        var stats = numStatReader.read();
+        var stats = numStatReader.getStats(repoPath);
 
         System.out.println(stats);
 

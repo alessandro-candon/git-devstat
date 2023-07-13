@@ -1,5 +1,5 @@
 /* OpenSource 2023 */
-package org.devstat.gitdevstat.support;
+package org.devstat.gitdevstat.git;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -19,21 +19,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class NumStatReader {
-    private Process proc;
-
-    public void prepareProcess(String repoPath) throws IOException {
-        final String[] realArgs = {
-            "git",
-            "log",
-            "--pretty=format:commit %h|%an|%ae|%al|%aD|%at|%cn|%ce|%cD|%ct|%f",
-            "--numstat"
-        };
-        proc = Runtime.getRuntime().exec(realArgs, null, new File(repoPath));
-        proc.getOutputStream().close();
-        proc.getErrorStream().close();
-    }
-
-    void onCommit(GitCommitResultDto gitAnalysisResultDto, byte[] buf) {
+    private void onCommit(GitCommitResultDto gitAnalysisResultDto, byte[] buf) {
         final MutableInteger ptr = new MutableInteger();
         while (ptr.value < buf.length) {
             if (buf[ptr.value] == '\n') break;
@@ -50,12 +36,9 @@ public class NumStatReader {
         }
     }
 
-    public Map<String, GitCommitResultDto> read() throws IOException {
+    public Map<String, GitCommitResultDto> getStats(String repoPath) throws IOException {
+        Process proc = prepareProcess(repoPath);
         Map<String, GitCommitResultDto> stats = new HashMap<>();
-        if (proc == null) {
-            return new HashMap<>();
-        }
-
         try (BufferedReader in =
                 new BufferedReader(new InputStreamReader(proc.getInputStream(), ISO_8859_1))) {
             String formattedLineOfCommit = null;
@@ -85,7 +68,19 @@ public class NumStatReader {
                 }
             }
         }
-        proc = null;
         return stats;
+    }
+
+    private Process prepareProcess(String repoPath) throws IOException {
+        final String[] realArgs = {
+            "git",
+            "log",
+            "--pretty=format:commit %h|%an|%ae|%al|%aD|%at|%cn|%ce|%cD|%ct|%f",
+            "--numstat"
+        };
+        var proc = Runtime.getRuntime().exec(realArgs, null, new File(repoPath));
+        proc.getOutputStream().close();
+        proc.getErrorStream().close();
+        return proc;
     }
 }

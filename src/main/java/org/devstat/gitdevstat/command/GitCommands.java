@@ -7,8 +7,8 @@ import java.util.List;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.dto.JobResult;
 import org.devstat.gitdevstat.git.IGitAnalyzer;
+import org.devstat.gitdevstat.git.NumStatReader;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
-import org.devstat.gitdevstat.support.NumStatReader;
 import org.devstat.gitdevstat.support.ThreadExecutor;
 import org.devstat.gitdevstat.utils.FsUtil;
 import org.springframework.shell.standard.ShellComponent;
@@ -44,10 +44,9 @@ public class GitCommands {
         var aggResStr = "";
         try {
             String repoPath = gitAnalyzer.clone(repositoryDto);
-            numStatReader.prepareProcess(repoPath);
-            var stats = numStatReader.read();
-            cleanerUtil.clearFolder();
+            var stats = numStatReader.getStats(repoPath);
 
+            cleanerUtil.clearFolder();
         } catch (IOException e) {
             return "Error on cleaning, please do it manually";
         }
