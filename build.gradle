@@ -80,3 +80,8 @@ tasks.register('updateGitHooks', Copy) {
 }
 compileJava.dependsOn updateGitHooks
 
+graalvmNative {
+	metadataRepository {
+		enabled = true
+	}
+}

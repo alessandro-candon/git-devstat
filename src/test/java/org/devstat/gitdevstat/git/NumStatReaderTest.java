@@ -2,10 +2,12 @@
 package org.devstat.gitdevstat.git;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import org.devstat.gitdevstat.RepoCleanerSpringBootTest;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
+import org.devstat.gitdevstat.git.dto.StatInfoWithPathDto;
 import org.devstat.gitdevstat.support.WorkerThread;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -24,6 +26,15 @@ class NumStatReaderTest extends RepoCleanerSpringBootTest {
         String repoPath = gitHubAnalyzer.clone(repositoryDto);
         var stats = numStatReader.getStats(repoPath);
         var firstStat = stats.get("2d014f1");
-        assertEquals(firstStat.ae(), "alessandro.candon@decathlon.com");
+        assertNotNull(firstStat);
+        assertEquals("2d014f1", firstStat.h());
+        assertEquals("alessandro.candon@decathlon.com", firstStat.ae());
+        assertNotNull(firstStat.statInfoDtoHashMap());
+        assertEquals(1, firstStat.statInfoDtoHashMap().size());
+        String statKey = "\t1\tsrc/main/java/org/devstat/gitdevstat/git/GitHubAnalyzer.java";
+        assertNotNull(firstStat.statInfoDtoHashMap().get(statKey));
+        assertEquals(
+                new StatInfoWithPathDto(statKey, 3, 1),
+                firstStat.statInfoDtoHashMap().get(statKey));
     }
 }
