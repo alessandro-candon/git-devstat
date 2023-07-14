@@ -15,10 +15,13 @@ import org.devstat.gitdevstat.git.dto.StatInfoWithPathDto;
 import org.devstat.gitdevstat.git.utils.MutableInteger;
 import org.devstat.gitdevstat.git.utils.RawParseUtils;
 import org.devstat.gitdevstat.git.utils.TemporaryBuffer;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 @Service
 public class NumStatReader {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(NumStatReader.class);
+
     private void onCommit(GitCommitResultDto gitAnalysisResultDto, byte[] buf) {
         final MutableInteger ptr = new MutableInteger();
         while (ptr.value < buf.length) {
@@ -36,37 +39,41 @@ public class NumStatReader {
         }
     }
 
-    public Map<String, GitCommitResultDto> getStats(String repoPath) throws IOException {
-        Process proc = prepareProcess(repoPath);
+    public Map<String, GitCommitResultDto> getStats(String repoPath) {
         Map<String, GitCommitResultDto> stats = new HashMap<>();
-        try (BufferedReader in =
-                new BufferedReader(new InputStreamReader(proc.getInputStream(), ISO_8859_1))) {
-            String formattedLineOfCommit = null;
-            GitCommitResultDto gitAnalysisResultDto = null;
-            TemporaryBuffer buf = null;
-            String line;
+        try {
+            Process proc = prepareProcess(repoPath);
+            try (BufferedReader in =
+                    new BufferedReader(new InputStreamReader(proc.getInputStream(), ISO_8859_1))) {
+                String formattedLineOfCommit = null;
+                GitCommitResultDto gitAnalysisResultDto = null;
+                TemporaryBuffer buf = null;
+                String line;
 
-            while ((line = in.readLine()) != null) {
-                if (line.startsWith("commit ")) {
-                    if (buf != null) {
-                        buf.close();
-                        onCommit(gitAnalysisResultDto, buf.toByteArray());
-                        buf.destroy();
+                while ((line = in.readLine()) != null) {
+                    if (line.startsWith("commit ")) {
+                        if (buf != null) {
+                            buf.close();
+                            onCommit(gitAnalysisResultDto, buf.toByteArray());
+                            buf.destroy();
+                        }
+                        formattedLineOfCommit = line.substring("commit ".length());
+
+                        gitAnalysisResultDto =
+                                new GitCommitResultDto.Builder(formattedLineOfCommit).build();
+
+                        stats.put(gitAnalysisResultDto.h(), gitAnalysisResultDto);
+
+                        buf = new TemporaryBuffer.LocalFile(null);
+                    } else if (buf != null) {
+                        // go to next output of command
+                        buf.write(line.getBytes(ISO_8859_1));
+                        buf.write('\n');
                     }
-                    formattedLineOfCommit = line.substring("commit ".length());
-
-                    gitAnalysisResultDto =
-                            new GitCommitResultDto.Builder(formattedLineOfCommit).build();
-
-                    stats.put(gitAnalysisResultDto.h(), gitAnalysisResultDto);
-
-                    buf = new TemporaryBuffer.LocalFile(null);
-                } else if (buf != null) {
-                    // go to next output of command
-                    buf.write(line.getBytes(ISO_8859_1));
-                    buf.write('\n');
                 }
             }
+        } catch (IOException e) {
+            log.error("unable to create statistics", e);
         }
         return stats;
     }

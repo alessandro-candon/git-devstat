@@ -45,7 +45,7 @@ public class GitHubClientTest {
         var res = gitHubClient.getRepositoryList("teamSlug");
         assertThat(res).isNotNull();
         assertThat(res).hasSize(2);
-        assertThat(res).contains(new RepositoryDto(-1, "-1 repo", "-1 repo fullname"));
-        assertThat(res).contains(new RepositoryDto(-2, "-2 repo", "-2 repo fullname"));
+        assertThat(res).contains(new RepositoryDto(-1, "-1 repo", "-1 repo fullname", null));
+        assertThat(res).contains(new RepositoryDto(-2, "-2 repo", "-2 repo fullname", null));
     }
 }
