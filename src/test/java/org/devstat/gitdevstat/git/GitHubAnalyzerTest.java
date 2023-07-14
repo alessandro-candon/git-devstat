@@ -12,7 +12,6 @@ import org.devstat.gitdevstat.RepoCleanerSpringBootTest;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.git.dto.GitCommitResultDto;
 import org.devstat.gitdevstat.git.dto.StatInfoWithPathDto;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -38,7 +37,7 @@ class GitHubAnalyzerTest extends RepoCleanerSpringBootTest {
     }
 
     @Test
-    void testAnalyze() throws IOException, GitAPIException {
+    void testAnalyze() throws IOException {
         var repositoryDto = new RepositoryDto(1, "git-devstat", "alessandro-candon/git-devstat");
         gitHubAnalyzer.clone(repositoryDto);
         var res = gitHubAnalyzer.stat(repositoryDto);

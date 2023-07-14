@@ -12,9 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.devstat.gitdevstat.git.dto.GitCommitResultDto;
 import org.devstat.gitdevstat.git.dto.StatInfoWithPathDto;
-import org.eclipse.jgit.util.MutableInteger;
-import org.eclipse.jgit.util.RawParseUtils;
-import org.eclipse.jgit.util.TemporaryBuffer;
+import org.devstat.gitdevstat.git.utils.MutableInteger;
+import org.devstat.gitdevstat.git.utils.RawParseUtils;
+import org.devstat.gitdevstat.git.utils.TemporaryBuffer;
 import org.springframework.stereotype.Service;
 
 @Service
