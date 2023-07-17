@@ -29,3 +29,10 @@ source .env.local
 
 In this way you have all the variables to run your script.
 
+Some example call:
+```
+analyze Pub,Pub,Pub git-devstat,SpringMicroservice,marketdata-api-js alessandro-candon/git-devstat,cmauri75/SpringMicroservice,barchart/marketdata-api-js
+single-analysis Pub git-devstat alessandro-candon/git-devstat
+single-analysis Pub SpringMicroservice cmauri75/SpringMicroservice
+single-analysis Pub marketdata-api-js barchart/marketdata-api-js
+```

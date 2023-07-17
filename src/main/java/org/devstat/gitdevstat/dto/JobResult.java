@@ -1,4 +1,7 @@
 /* OpenSource 2023 */
 package org.devstat.gitdevstat.dto;
 
-public record JobResult(int code, String description) {}
+import java.util.Map;
+import org.devstat.gitdevstat.git.dto.GitCommitResultDto;
+
+public record JobResult(int code, Map<String, GitCommitResultDto> resultData) {}

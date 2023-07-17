@@ -23,7 +23,8 @@ class GitHubAnalyzerTest extends RepoCleanerSpringBootTest {
 
     @Test
     void testClone() {
-        var repositoryDto = new RepositoryDto(1, "git-devstat", "alessandro-candon/git-devstat");
+        var repositoryDto =
+                new RepositoryDto(1, "git-devstat", "alessandro-candon/git-devstat", RepoType.Pub);
         gitHubAnalyzer.clone(repositoryDto);
         File f =
                 new File(
@@ -38,7 +39,8 @@ class GitHubAnalyzerTest extends RepoCleanerSpringBootTest {
 
     @Test
     void testAnalyze() throws IOException {
-        var repositoryDto = new RepositoryDto(1, "git-devstat", "alessandro-candon/git-devstat");
+        var repositoryDto =
+                new RepositoryDto(1, "git-devstat", "alessandro-candon/git-devstat", RepoType.Pub);
         gitHubAnalyzer.clone(repositoryDto);
         var res = gitHubAnalyzer.stat(repositoryDto);
         assertNotNull(res);

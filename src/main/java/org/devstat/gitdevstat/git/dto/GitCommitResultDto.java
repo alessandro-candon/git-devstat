@@ -43,9 +43,7 @@ public record GitCommitResultDto(
         }
 
         public GitCommitResultDto build() {
-
             StringTokenizer st = new StringTokenizer(formattedLog, "|");
-
             return new GitCommitResultDto(
                     st.nextToken(),
                     st.nextToken(),
@@ -57,7 +55,7 @@ public record GitCommitResultDto(
                     st.nextToken(),
                     st.nextToken(),
                     Integer.parseInt(st.nextToken()),
-                    st.nextToken(),
+                    st.hasMoreTokens() ? st.nextToken() : "",
                     new HashMap<>());
         }
     }
