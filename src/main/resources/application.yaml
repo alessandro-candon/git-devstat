@@ -1,12 +1,14 @@
 spring:
   main:
     web-application-type: none
+    jackson:
+      property-naming-strategy: SNAKE_CASE
 app:
   threadPoolSize: 5
   tmpDir: "/tmp"
   github:
     baseUrl: "https://api.github.com"
-    org: '${ORGANIZATION}'
+    org: "${ORGANIZATION}"
     pat: "${GITHUB_TOKEN}"
 logging:
   level:

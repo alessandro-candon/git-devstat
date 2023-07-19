@@ -2,11 +2,10 @@
 package org.devstat.gitdevstat.command;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
-import org.devstat.gitdevstat.dto.JobResult;
+import org.devstat.gitdevstat.client.gitprovider.github.GitHubClient;
+import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
 import org.devstat.gitdevstat.git.IGitAnalyzer;
 import org.devstat.gitdevstat.git.NumStatReader;
 import org.devstat.gitdevstat.git.RepoType;
@@ -22,6 +21,7 @@ import org.springframework.shell.standard.ShellOption;
 public class GitCommands {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(GitCommands.class);
 
+    private final GitHubClient gitHubClient;
     private final IGitAnalyzer gitAnalyzer;
     private final NumStatReader numStatReader;
     private final FsUtil cleanerUtil;
@@ -30,11 +30,13 @@ public class GitCommands {
             ThreadExecutor threadExecutor,
             IGitAnalyzer gitAnalyzer,
             NumStatReader numStatReader,
-            FsUtil cleanerUtil) {
+            FsUtil cleanerUtil,
+            GitHubClient gitHubClient) {
         this.threadExecutor = threadExecutor;
         this.gitAnalyzer = gitAnalyzer;
         this.numStatReader = numStatReader;
         this.cleanerUtil = cleanerUtil;
+        this.gitHubClient = gitHubClient;
     }
 
     private final ThreadExecutor threadExecutor;
@@ -47,7 +49,7 @@ public class GitCommands {
         var repositoryDto = new RepositoryDto(1, repoName, repoFullName, repoType);
         try {
             String repoPath = gitAnalyzer.clone(repositoryDto);
-            var stats = numStatReader.getStats(repoPath);
+            var stats = numStatReader.getCommitStatistics(repoPath);
             cleanerUtil.clearFolder();
             return stats.toString();
         } catch (Exception e) {
@@ -83,13 +85,47 @@ public class GitCommands {
                     () -> {
                         var repositoryDto = new RepositoryDto(j, repos[j], reposName[j], types[j]);
                         String repoPath = gitAnalyzer.clone(repositoryDto);
-                        var stats = numStatReader.getStats(repoPath);
-                        return new JobResult(0, stats);
+                        var commitStatistics = numStatReader.getCommitStatistics(repoPath);
+                        return new GitRepositoryWithCommitResultDto(
+                                repositoryDto, commitStatistics);
                     };
             jobs.add(aJob);
         }
 
-        List<JobResult> jobRes = threadExecutor.execute(jobs);
+        List<GitRepositoryWithCommitResultDto> jobRes = threadExecutor.execute(jobs);
+
+        cleanerUtil.clearFolder();
+
+        return jobRes.toString();
+    }
+
+    @ShellMethod(key = "analyze-github-team-repos")
+    public String runGithubTeamRepos(@ShellOption String teamNamesCsv) throws IOException {
+
+        String[] teamNames = teamNamesCsv.split(",");
+
+        List<IWorkerThreadJob> jobs = new ArrayList<>(teamNames.length);
+
+        Map<Integer, RepositoryDto> repositoryDtoMap = new HashMap<>();
+
+        for (String teamName : teamNames) {
+            var repositoryListDto = this.gitHubClient.getRepositoryList(teamName);
+            for (RepositoryDto repositoryDto : repositoryListDto) {
+                repositoryDtoMap.put(repositoryDto.id(), repositoryDto);
+            }
+        }
+
+        for (RepositoryDto repositoryDto : repositoryDtoMap.values()) {
+            IWorkerThreadJob aJob =
+                    () -> {
+                        String repoPath = gitAnalyzer.clone(repositoryDto);
+                        var commitStatistics = numStatReader.getCommitStatistics(repoPath);
+                        return new GitRepositoryWithCommitResultDto(
+                                repositoryDto, commitStatistics);
+                    };
+            jobs.add(aJob);
+        }
+        List<GitRepositoryWithCommitResultDto> jobRes = threadExecutor.execute(jobs);
 
         cleanerUtil.clearFolder();
 

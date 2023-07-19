@@ -25,7 +25,7 @@ class NumStatReaderTest extends RepoCleanerSpringBootTest {
         var repositoryDto =
                 new RepositoryDto(1, "git-devstat", "alessandro-candon/git-devstat", RepoType.Pub);
         String repoPath = gitHubAnalyzer.clone(repositoryDto);
-        var stats = numStatReader.getStats(repoPath);
+        var stats = numStatReader.getCommitStatistics(repoPath);
         var firstStat = stats.get("2d014f1");
         assertNotNull(firstStat);
         assertEquals("2d014f1", firstStat.h());

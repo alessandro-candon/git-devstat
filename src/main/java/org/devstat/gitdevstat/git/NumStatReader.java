@@ -39,7 +39,7 @@ public class NumStatReader {
         }
     }
 
-    public Map<String, GitCommitResultDto> getStats(String repoPath) {
+    public Map<String, GitCommitResultDto> getCommitStatistics(String repoPath) {
         Map<String, GitCommitResultDto> stats = new HashMap<>();
         try {
             Process proc = prepareProcess(repoPath);

@@ -35,7 +35,10 @@ public class GitHubAnalyzer implements IGitAnalyzer {
      * @return null if exception occurred, path of cloned repo otherwise
      */
     public String clone(RepositoryDto repositoryDto) {
-        log.info("Cloning repo {}", repositoryDto.name());
+        log.info(
+                "Cloning repo name: {}, fullname: {}",
+                repositoryDto.name(),
+                repositoryDto.fullName());
         String storeDirPath = getStoreDirPath(repositoryDto);
         String gitPath = "github.com/".concat(repositoryDto.fullName());
 
@@ -73,7 +76,7 @@ public class GitHubAnalyzer implements IGitAnalyzer {
         if (!fs.repoFolderExists(repositoryDto)) {
             repoDirPath = clone(repositoryDto);
         }
-        return numStatReader.getStats(repoDirPath);
+        return numStatReader.getCommitStatistics(repoDirPath);
     }
 
     private String getStoreDirPath(RepositoryDto repositoryDto) {
