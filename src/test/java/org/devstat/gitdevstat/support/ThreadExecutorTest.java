@@ -8,7 +8,6 @@ import java.util.Map;
 import org.devstat.gitdevstat.GitdevstatApplicationTests;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
-import org.devstat.gitdevstat.git.RepoType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -26,7 +25,7 @@ public class ThreadExecutorTest {
     void testParallelIsWorking() {
         List<IWorkerThreadJob> jobs = GitdevstatApplicationTests.get10WorkerThreadJobs(10);
         List<GitRepositoryWithCommitResultDto> jobRes = threadExecutor.execute(jobs);
-        var repositoryDto = new RepositoryDto(1, "", "", RepoType.Pub);
+        var repositoryDto = new RepositoryDto(1, "", "", false);
         assertThat(jobRes)
                 .isNotNull()
                 .contains(new GitRepositoryWithCommitResultDto(repositoryDto, Map.of()))

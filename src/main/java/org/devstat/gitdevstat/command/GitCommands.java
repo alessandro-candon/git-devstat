@@ -8,7 +8,6 @@ import org.devstat.gitdevstat.client.gitprovider.github.GitHubClient;
 import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
 import org.devstat.gitdevstat.git.IGitAnalyzer;
 import org.devstat.gitdevstat.git.NumStatReader;
-import org.devstat.gitdevstat.git.RepoType;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
 import org.devstat.gitdevstat.support.ThreadExecutor;
 import org.devstat.gitdevstat.utils.FsUtil;
@@ -43,10 +42,11 @@ public class GitCommands {
 
     @ShellMethod(key = "single-analysis")
     public String singleAnalysis(
-            @ShellOption(defaultValue = "Pub") RepoType repoType,
+            @ShellOption(defaultValue = "false") String isPrivate,
             @ShellOption(defaultValue = "git-devstat") String repoName,
             @ShellOption(defaultValue = "alessandro-candon/git-devstat") String repoFullName) {
-        var repositoryDto = new RepositoryDto(1, repoName, repoFullName, repoType);
+        var repositoryDto =
+                new RepositoryDto(1, repoName, repoFullName, Boolean.parseBoolean(isPrivate));
         try {
             String repoPath = gitAnalyzer.clone(repositoryDto);
             var stats = numStatReader.getCommitStatistics(repoPath);
@@ -65,15 +65,13 @@ public class GitCommands {
             @ShellOption String repoFullNames)
             throws IOException {
 
-        String[] reposTypesS = repoTypes.split(",");
-        RepoType[] types =
-                Arrays.stream(reposTypesS).map(t -> RepoType.valueOf(t)).toArray(RepoType[]::new);
-
-        System.err.println("types are: " + types);
         String[] repos = repoNames.split(",");
         String[] reposName = repoFullNames.split(",");
+        String[] reposTypesS = repoTypes.split(",");
+        Boolean[] arePrivate =
+                Arrays.stream(reposTypesS).map(Boolean::parseBoolean).toArray(Boolean[]::new);
 
-        if (types.length != repos.length || repos.length != reposName.length) {
+        if (arePrivate.length != repos.length || repos.length != reposName.length) {
             return "Please check input parameters";
         }
 
@@ -83,7 +81,8 @@ public class GitCommands {
             final int j = i;
             IWorkerThreadJob aJob =
                     () -> {
-                        var repositoryDto = new RepositoryDto(j, repos[j], reposName[j], types[j]);
+                        var repositoryDto =
+                                new RepositoryDto(j, repos[j], reposName[j], arePrivate[j]);
                         String repoPath = gitAnalyzer.clone(repositoryDto);
                         var commitStatistics = numStatReader.getCommitStatistics(repoPath);
                         return new GitRepositoryWithCommitResultDto(

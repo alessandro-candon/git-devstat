@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
-import org.devstat.gitdevstat.git.RepoType;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +21,7 @@ public class GitdevstatApplicationTests {
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    var repositoryDto = new RepositoryDto(1, "", "", RepoType.Pub);
+                    var repositoryDto = new RepositoryDto(1, "", "", false);
                     return new GitRepositoryWithCommitResultDto(repositoryDto, Map.of());
                 };
 
