@@ -2,12 +2,17 @@
 package org.devstat.gitdevstat.view.linesofcodebyauthor;
 
 public class LinesOfCodeByAuthorDto {
-
-    String authorEmail;
-
     int added;
 
     int deleted;
 
     public LinesOfCodeByAuthorDto() {}
+
+    public void addAddedLines(int added) {
+        this.added += added;
+    }
+
+    public void addDeletedLines(int deleted) {
+        this.deleted += deleted;
+    }
 }

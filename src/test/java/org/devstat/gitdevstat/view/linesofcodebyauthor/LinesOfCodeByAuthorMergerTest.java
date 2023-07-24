@@ -19,7 +19,7 @@ class LinesOfCodeByAuthorMergerTest {
     void analyze() {
         String[] githubTeams = {"tacos"};
         HashMap<String, String[]> authorIds = new HashMap<>();
-        authorIds.put("alessandro-candon", new String[] {"", ""});
+        authorIds.put("cesare-mauri", new String[] {"cesare.mauri@test.com", ""});
         String[] excludedFiles = {""};
         var gitHubAnalyzerConfigurationDto =
                 new GitHubAnalyzerConfigurationDto(githubTeams, authorIds, excludedFiles);
@@ -45,5 +45,7 @@ class LinesOfCodeByAuthorMergerTest {
         var linesOfCodeByAuthor = new LinesOfCodeByAuthorMerger(gitHubAnalyzerConfigurationDto);
 
         var result = linesOfCodeByAuthor.analyze(gitRepositoryWithCommitResultDtoList);
+
+        assertTrue(result.containsKey("cesare-mauri"));
     }
 }
