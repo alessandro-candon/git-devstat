@@ -10,6 +10,7 @@ app:
     baseUrl: "https://api.github.com"
     org: "${ORGANIZATION}"
     pat: "${GITHUB_TOKEN}"
+
 logging:
   level:
     org:

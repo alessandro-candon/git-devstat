@@ -3,6 +3,7 @@ package org.devstat.gitdevstat.command;
 
 import java.io.IOException;
 import java.util.*;
+import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.client.gitprovider.github.GitHubClient;
 import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
@@ -11,6 +12,7 @@ import org.devstat.gitdevstat.git.NumStatReader;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
 import org.devstat.gitdevstat.support.ThreadExecutor;
 import org.devstat.gitdevstat.utils.FsUtil;
+import org.devstat.gitdevstat.view.linesofcodebyauthor.LinesOfCodeByAuthorMerger;
 import org.slf4j.Logger;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -20,17 +22,21 @@ import org.springframework.shell.standard.ShellOption;
 public class GitCommands {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(GitCommands.class);
 
+    private final AppProperties appProperties;
+
     private final GitHubClient gitHubClient;
     private final IGitAnalyzer gitAnalyzer;
     private final NumStatReader numStatReader;
     private final FsUtil cleanerUtil;
 
     public GitCommands(
+            AppProperties appProperties,
             ThreadExecutor threadExecutor,
             IGitAnalyzer gitAnalyzer,
             NumStatReader numStatReader,
             FsUtil cleanerUtil,
             GitHubClient gitHubClient) {
+        this.appProperties = appProperties;
         this.threadExecutor = threadExecutor;
         this.gitAnalyzer = gitAnalyzer;
         this.numStatReader = numStatReader;
@@ -129,5 +135,38 @@ public class GitCommands {
         cleanerUtil.clearFolder();
 
         return jobRes.toString();
+    }
+
+    @ShellMethod(key = "analyze-from-config")
+    public String analyzeFromConfig() throws IOException {
+
+        List<IWorkerThreadJob> jobs = new ArrayList<>(this.appProperties.github().teams().length);
+        Map<Integer, RepositoryDto> repositoryDtoMap = new HashMap<>();
+
+        for (String teamName : this.appProperties.github().teams()) {
+            var repositoryListDto = this.gitHubClient.getRepositoryList(teamName);
+            for (RepositoryDto repositoryDto : repositoryListDto) {
+                repositoryDtoMap.put(repositoryDto.id(), repositoryDto);
+            }
+        }
+
+        for (RepositoryDto repositoryDto : repositoryDtoMap.values()) {
+            IWorkerThreadJob aJob =
+                    () -> {
+                        String repoPath = gitAnalyzer.clone(repositoryDto);
+                        var commitStatistics = numStatReader.getCommitStatistics(repoPath);
+                        return new GitRepositoryWithCommitResultDto(
+                                repositoryDto, commitStatistics);
+                    };
+            jobs.add(aJob);
+        }
+        List<GitRepositoryWithCommitResultDto> jobRes = threadExecutor.execute(jobs);
+
+        cleanerUtil.clearFolder();
+
+        var linesOfCodeByAuthorMerger = new LinesOfCodeByAuthorMerger(this.appProperties);
+        var result = linesOfCodeByAuthorMerger.analyze(jobRes);
+
+        return result.toString();
     }
 }

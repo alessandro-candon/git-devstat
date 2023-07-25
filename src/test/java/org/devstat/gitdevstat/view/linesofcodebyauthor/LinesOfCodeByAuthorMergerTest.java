@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
-import org.devstat.gitdevstat.dto.GitHubAnalyzerConfigurationDto;
 import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
 import org.devstat.gitdevstat.git.dto.GitCommitResultDto;
 import org.devstat.gitdevstat.git.dto.StatInfoWithPathDto;
@@ -21,8 +21,10 @@ class LinesOfCodeByAuthorMergerTest {
         HashMap<String, String[]> authorIds = new HashMap<>();
         authorIds.put("cesare-mauri", new String[] {"cesare.mauri@test.com", ""});
         String[] excludedFiles = {""};
-        var gitHubAnalyzerConfigurationDto =
-                new GitHubAnalyzerConfigurationDto(githubTeams, authorIds, excludedFiles);
+        var githubAppProp = new AppProperties.Github("", "", "", githubTeams);
+
+        var configAppProp = new AppProperties.Config(authorIds, excludedFiles, null);
+        var appProperties = new AppProperties(1, "/tmp", githubAppProp, configAppProp);
 
         List<GitRepositoryWithCommitResultDto> gitRepositoryWithCommitResultDtoList =
                 new ArrayList<>();
@@ -42,7 +44,7 @@ class LinesOfCodeByAuthorMergerTest {
 
         gitRepositoryWithCommitResultDtoList.add(gitRepositoryWithCommitResultDto);
 
-        var linesOfCodeByAuthor = new LinesOfCodeByAuthorMerger(gitHubAnalyzerConfigurationDto);
+        var linesOfCodeByAuthor = new LinesOfCodeByAuthorMerger(appProperties);
 
         var result = linesOfCodeByAuthor.analyze(gitRepositoryWithCommitResultDtoList);
 

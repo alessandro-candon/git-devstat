@@ -4,23 +4,23 @@ package org.devstat.gitdevstat.view.linesofcodebyauthor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.devstat.gitdevstat.dto.GitHubAnalyzerConfigurationDto;
+import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
 import org.devstat.gitdevstat.git.dto.StatInfoWithPathDto;
 
 public class LinesOfCodeByAuthorMerger {
 
-    private GitHubAnalyzerConfigurationDto gitHubAnalyzerConfigurationDto;
+    private AppProperties appProperties;
 
-    LinesOfCodeByAuthorMerger(GitHubAnalyzerConfigurationDto gitHubAnalyzerConfigurationDto) {
-        this.gitHubAnalyzerConfigurationDto = gitHubAnalyzerConfigurationDto;
+    public LinesOfCodeByAuthorMerger(AppProperties appProperties) {
+        this.appProperties = appProperties;
     }
 
     public Map<String, LinesOfCodeByAuthorDto> analyze(
             List<GitRepositoryWithCommitResultDto> gitRepositoryWithCommitResultDtoList) {
         var invertedAndDuplicatedAuthorAndId = new HashMap<String, String>();
 
-        for (var authorEntrySet : this.gitHubAnalyzerConfigurationDto.getAuthorIds().entrySet()) {
+        for (var authorEntrySet : appProperties.config().authorIds().entrySet()) {
             for (var authorValue : authorEntrySet.getValue()) {
                 invertedAndDuplicatedAuthorAndId.put(authorValue, authorEntrySet.getKey());
             }
