@@ -2,12 +2,14 @@
   {
     "id": -1,
     "name": "-1 repo",
-    "fullName": "-1 repo fullname"
+    "full_name": "-1 repo fullname",
+    "private": true
   },
   {
     "id": -2,
     "name": "-2 repo",
-    "fullName": "-2 repo fullname"
+    "full_name": "-2 repo fullname",
+    "private": true
   }
 ]
 

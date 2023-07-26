@@ -24,7 +24,7 @@ class GitHubAnalyzerTest extends RepoCleanerSpringBootTest {
     @Test
     void testClone() {
         var repositoryDto =
-                new RepositoryDto(1, "git-devstat", "alessandro-candon/git-devstat", RepoType.Pub);
+                new RepositoryDto(1, "git-devstat", "alessandro-candon/git-devstat", false);
         gitHubAnalyzer.clone(repositoryDto);
         File f =
                 new File(
@@ -40,7 +40,7 @@ class GitHubAnalyzerTest extends RepoCleanerSpringBootTest {
     @Test
     void testAnalyze() throws IOException {
         var repositoryDto =
-                new RepositoryDto(1, "git-devstat", "alessandro-candon/git-devstat", RepoType.Pub);
+                new RepositoryDto(1, "git-devstat", "alessandro-candon/git-devstat", false);
         gitHubAnalyzer.clone(repositoryDto);
         var res = gitHubAnalyzer.stat(repositoryDto);
         assertNotNull(res);
@@ -50,12 +50,12 @@ class GitHubAnalyzerTest extends RepoCleanerSpringBootTest {
                 new GitCommitResultDto(
                         "e6f8862",
                         "Cesare Mauri",
-                        "cesare.mauri@decathlon.com",
+                        "cesare.mauri@test.com",
                         "cesare.mauri",
                         "Tue, 4 Jul 2023 18:02:20 +0200",
                         1688486540,
                         "Cesare Mauri",
-                        "cesare.mauri@decathlon.com",
+                        "cesare.mauri@test.com",
                         "Tue, 4 Jul 2023 18:02:20 +0200",
                         1688486540,
                         "Stay-update",

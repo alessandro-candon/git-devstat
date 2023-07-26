@@ -2,10 +2,10 @@
 package org.devstat.gitdevstat.support;
 
 import java.util.concurrent.Callable;
-import org.devstat.gitdevstat.dto.JobResult;
+import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
 import org.slf4j.Logger;
 
-public class WorkerThread implements Callable<JobResult> {
+public class WorkerThread implements Callable<GitRepositoryWithCommitResultDto> {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(WorkerThread.class);
 
     private IWorkerThreadJob job;
@@ -15,7 +15,7 @@ public class WorkerThread implements Callable<JobResult> {
     }
 
     @Override
-    public JobResult call() {
+    public GitRepositoryWithCommitResultDto call() {
         log.info("{} Starting...", Thread.currentThread().getName());
         var res = job.processCommand();
         log.info("{} Finished", Thread.currentThread().getName());

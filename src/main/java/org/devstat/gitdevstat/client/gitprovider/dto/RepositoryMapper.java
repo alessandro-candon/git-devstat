@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = SPRING)
 public interface RepositoryMapper {
+
     RepositoryDto repositoryToGithubRepo(GithubRepoDto source);
 
     GithubRepoDto githubRepoToRepository(RepositoryDto destination);

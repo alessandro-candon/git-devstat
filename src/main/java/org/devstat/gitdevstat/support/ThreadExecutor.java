@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.devstat.gitdevstat.AppProperties;
-import org.devstat.gitdevstat.dto.JobResult;
+import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
@@ -22,16 +22,16 @@ public class ThreadExecutor {
 
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ThreadExecutor.class);
 
-    public List<JobResult> execute(List<IWorkerThreadJob> jobs) {
+    public List<GitRepositoryWithCommitResultDto> execute(List<IWorkerThreadJob> jobs) {
         ExecutorService executor = Executors.newFixedThreadPool(appProperties.threadPoolSize());
 
-        List<Future<JobResult>> futures = new ArrayList<>();
+        List<Future<GitRepositoryWithCommitResultDto>> futures = new ArrayList<>();
         for (IWorkerThreadJob aJob : jobs) {
             futures.add(executor.submit(new WorkerThread(aJob)));
         }
         executor.shutdown();
 
-        List<JobResult> ret =
+        List<GitRepositoryWithCommitResultDto> ret =
                 futures.stream()
                         .map(
                                 job -> {

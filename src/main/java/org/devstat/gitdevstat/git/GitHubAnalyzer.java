@@ -35,7 +35,10 @@ public class GitHubAnalyzer implements IGitAnalyzer {
      * @return null if exception occurred, path of cloned repo otherwise
      */
     public String clone(RepositoryDto repositoryDto) {
-        log.info("Cloning repo {}", repositoryDto.name());
+        log.info(
+                "Cloning repo name: {}, fullname: {}",
+                repositoryDto.name(),
+                repositoryDto.fullName());
         String storeDirPath = getStoreDirPath(repositoryDto);
         String gitPath = "github.com/".concat(repositoryDto.fullName());
 
@@ -47,7 +50,7 @@ public class GitHubAnalyzer implements IGitAnalyzer {
                             appProperties.github().pat(),
                             gitPath,
                             storeDir,
-                            repositoryDto.repoType());
+                            repositoryDto.isPrivate());
             log.debug("Clone finished with resultcode: {}", resCode);
         } catch (IOException | InterruptedException e) {
             log.error("Error during clone", e);
@@ -57,12 +60,10 @@ public class GitHubAnalyzer implements IGitAnalyzer {
         return storeDirPath;
     }
 
-    private int execClone(String pat, String repoPath, File destDir, RepoType repoType)
+    private int execClone(String pat, String repoPath, File destDir, boolean isPrivate)
             throws IOException, InterruptedException {
         final String[] realArgs = {
-            "git",
-            "clone",
-            repoType == RepoType.Priv ? "https://" + pat + "@" + repoPath : "https://" + repoPath,
+            "git", "clone", isPrivate ? "https://" + pat + "@" + repoPath : "https://" + repoPath,
         };
         var proc = Runtime.getRuntime().exec(realArgs, null, destDir.getParentFile());
         return proc.waitFor();
@@ -73,7 +74,7 @@ public class GitHubAnalyzer implements IGitAnalyzer {
         if (!fs.repoFolderExists(repositoryDto)) {
             repoDirPath = clone(repositoryDto);
         }
-        return numStatReader.getStats(repoDirPath);
+        return numStatReader.getCommitStatistics(repoDirPath);
     }
 
     private String getStoreDirPath(RepositoryDto repositoryDto) {

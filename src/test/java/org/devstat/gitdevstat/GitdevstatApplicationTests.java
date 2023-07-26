@@ -4,7 +4,8 @@ package org.devstat.gitdevstat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.devstat.gitdevstat.dto.JobResult;
+import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
+import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +21,8 @@ public class GitdevstatApplicationTests {
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    return new JobResult(-1, Map.of());
+                    var repositoryDto = new RepositoryDto(1, "", "", false);
+                    return new GitRepositoryWithCommitResultDto(repositoryDto, Map.of());
                 };
 
         List<IWorkerThreadJob> jobs = Collections.nCopies(nCopies, aJob);
