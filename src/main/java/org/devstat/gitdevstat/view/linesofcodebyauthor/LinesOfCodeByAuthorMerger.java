@@ -46,7 +46,7 @@ public class LinesOfCodeByAuthorMerger {
 
                 var linesDeletedThisCommit =
                         gitCommitEntry.getValue().statInfoDtoHashMap().values().stream()
-                                .mapToInt(StatInfoWithPathDto::added)
+                                .mapToInt(StatInfoWithPathDto::deleted)
                                 .sum();
 
                 linesOfCodeByAuthorToFIll.addAddedLines(linesAddedThisCommit);
