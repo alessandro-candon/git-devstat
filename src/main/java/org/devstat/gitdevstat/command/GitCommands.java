@@ -180,7 +180,7 @@ public class GitCommands {
         String[] order = new String[] {"AUTHORID", "ADDED", "DELETED"};
 
         try (Writer writer = Files.newBufferedWriter(Paths.get("/tmp/analyze-from-config.csv"))) {
-            exportUtil.serializeToCsv(writer, new HashSet<>(result.values()), order);
+            exportUtil.serializeToCsv(writer, result.values(), order);
         } catch (IOException | CsvRequiredFieldEmptyException | CsvDataTypeMismatchException ioe) {
             log.error(ioe.getMessage());
         }

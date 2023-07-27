@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.1.1'
-	id 'io.spring.dependency-management' version '1.1.1'
+	id 'org.springframework.boot' version '3.1.2'
+	id 'io.spring.dependency-management' version '1.1.2'
 	id 'org.graalvm.buildtools.native' version '0.9.23'
 
 	id 'jacoco'
@@ -13,7 +13,7 @@ plugins {
 }
 
 group = 'org.devstat'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.0-SNAPSHOT'
 
 java {
 	sourceCompatibility = '17'
