@@ -45,23 +45,23 @@ class GitHubAnalyzerTest extends RepoCleanerSpringBootTest {
         var res = gitHubAnalyzer.stat(repositoryDto);
         assertNotNull(res);
         assertTrue(res.size() >= 24);
-        assertNotNull(res.get("e6f8862"));
+        assertNotNull(res.get("7fa884d"));
         assertEquals(
                 new GitCommitResultDto(
-                        "e6f8862",
-                        "Cesare Mauri",
-                        "cesare.mauri@test.com",
-                        "cesare.mauri",
-                        "Tue, 4 Jul 2023 18:02:20 +0200",
-                        1688486540,
-                        "Cesare Mauri",
-                        "cesare.mauri@test.com",
-                        "Tue, 4 Jul 2023 18:02:20 +0200",
-                        1688486540,
-                        "Stay-update",
+                        "7fa884d",
+                        "dependabot[bot]",
+                        "49699333+dependabot[bot]@users.noreply.github.com",
+                        "49699333+dependabot[bot]",
+                        "Mon, 17 Jul 2023 01:40:14 +0000",
+                        1689558014,
+                        "GitHub",
+                        "noreply@github.com",
+                        "Mon, 17 Jul 2023 01:40:14 +0000",
+                        1689558014,
+                        "build-deps-bump-io.spring.dependency-management-from-1.1.0-to-1.1.1",
                         Map.of(
-                                "0\t0\t.github/dependabot.yml",
-                                new StatInfoWithPathDto("0\t0\t.github/dependabot.yml", 10, 0))),
-                res.get("e6f8862"));
+                                "\t1\tbuild.gradle",
+                                new StatInfoWithPathDto("\t1\tbuild.gradle", 1, 1))),
+                res.get("7fa884d"));
     }
 }
