@@ -5,7 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
 import org.devstat.gitdevstat.view.linesofcodebyauthor.LinesOfCodeByAuthorDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,20 +27,20 @@ class ExportUtilTest {
         String exceptRes =
                 """
                         "AUTHORID","ADDED","DELETED"
-                        "Alexander","1","2"
-                        "ZZZ","0","0"
                         "Cèsar","2147483647","0"
+                        "ZZZ","0","0"
+                        "Alexander","1","2"
                         """;
 
-        Set<LinesOfCodeByAuthorDto> data =
-                Set.of(
-                        new LinesOfCodeByAuthorDto("Alexander", 1, 2),
-                        new LinesOfCodeByAuthorDto("ZZZ", 0, 0),
-                        new LinesOfCodeByAuthorDto("Cèsar", Integer.MAX_VALUE, 0));
+        Map<String, LinesOfCodeByAuthorDto> data =
+                Map.of(
+                        "Alexander", new LinesOfCodeByAuthorDto("Alexander", 1, 2),
+                        "ZZZ", new LinesOfCodeByAuthorDto("ZZZ", 0, 0),
+                        "Cèsar", new LinesOfCodeByAuthorDto("Cèsar", Integer.MAX_VALUE, 0));
 
         String[] order = new String[] {"AUTHORID", "ADDED", "DELETED"};
 
-        exportUtil.serializeToCsv(strWriter, data, order);
+        exportUtil.serializeToCsv(strWriter, new HashSet<>(data.values()), order);
 
         assertThat(strWriter).isNotNull();
         assertThat(strWriter.toString()).isEqualTo(exceptRes);

@@ -1,6 +1,8 @@
 /* OpenSource 2023 */
 package org.devstat.gitdevstat.command;
 
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -175,9 +177,11 @@ public class GitCommands {
         var linesOfCodeByAuthorMerger = new LinesOfCodeByAuthorMerger(this.appProperties);
         var result = linesOfCodeByAuthorMerger.analyze(jobRes);
 
+        String[] order = new String[] {"AUTHORID", "ADDED", "DELETED"};
+
         try (Writer writer = Files.newBufferedWriter(Paths.get("/tmp/analyze-from-config.csv"))) {
-            exportUtil.serializeToCsv(writer, result);
-        } catch (IOException ioe) {
+            exportUtil.serializeToCsv(writer, new HashSet<>(result.values()), order);
+        } catch (IOException | CsvRequiredFieldEmptyException | CsvDataTypeMismatchException ioe) {
             log.error(ioe.getMessage());
         }
 
