@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.List;
+import java.util.Set;
 import org.devstat.gitdevstat.view.linesofcodebyauthor.LinesOfCodeByAuthorDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,8 +31,8 @@ class ExportUtilTest {
                         "Cèsar","2147483647","0"
                         """;
 
-        List<LinesOfCodeByAuthorDto> data =
-                List.of(
+        Set<LinesOfCodeByAuthorDto> data =
+                Set.of(
                         new LinesOfCodeByAuthorDto("Alexander", 1, 2),
                         new LinesOfCodeByAuthorDto("ZZZ", 0, 0),
                         new LinesOfCodeByAuthorDto("Cèsar", Integer.MAX_VALUE, 0));

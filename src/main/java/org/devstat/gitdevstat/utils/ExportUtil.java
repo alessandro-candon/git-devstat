@@ -16,8 +16,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ExportUtil {
-    public void serializeToCsv(Writer writer, List data, String[] literalOrder)
+    public void serializeToCsv(Writer writer, Collection coll, String[] literalOrder)
             throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
+
+        List data = new ArrayList(coll);
 
         HeaderColumnNameMappingStrategy<LinesOfCodeByAuthorDto> strategy =
                 new HeaderColumnNameMappingStrategyBuilder<LinesOfCodeByAuthorDto>().build();
