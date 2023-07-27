@@ -2,40 +2,37 @@
 package org.devstat.gitdevstat.utils;
 
 import com.opencsv.CSVWriter;
-import com.opencsv.CSVWriterBuilder;
-import com.opencsv.ICSVWriter;
+import com.opencsv.bean.HeaderColumnNameMappingStrategy;
+import com.opencsv.bean.HeaderColumnNameMappingStrategyBuilder;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.bean.comparator.LiteralComparator;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import org.devstat.gitdevstat.view.linesofcodebyauthor.LinesOfCodeByAuthorDto;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ExportUtil {
-    public ExportUtil() {}
+    public void serializeToCsv(Writer writer, Collection coll, String[] literalOrder)
+            throws CsvRequiredFieldEmptyException, CsvDataTypeMismatchException {
 
-    public void serializeToCsv(Writer writer, Map<String, LinesOfCodeByAuthorDto> data) {
-        TreeMap<String, LinesOfCodeByAuthorDto> sorted = new TreeMap<>();
-        sorted.putAll(data);
+        List data = new ArrayList(coll);
 
-        List<String[]> sData = new ArrayList<>(sorted.size());
-        for (Map.Entry<String, LinesOfCodeByAuthorDto> entry : sorted.entrySet()) {
-            sData.add(
-                    new String[] {
-                        entry.getKey(),
-                        Integer.toString(entry.getValue().getAdded()),
-                        Integer.toString(entry.getValue().getDeleted())
-                    });
-        }
+        HeaderColumnNameMappingStrategy<LinesOfCodeByAuthorDto> strategy =
+                new HeaderColumnNameMappingStrategyBuilder<LinesOfCodeByAuthorDto>().build();
+        strategy.setType(LinesOfCodeByAuthorDto.class);
+        strategy.setColumnOrderOnWrite(new LiteralComparator(literalOrder));
 
-        ICSVWriter csvWriter =
-                new CSVWriterBuilder(writer)
+        StatefulBeanToCsv beanToCsv =
+                new StatefulBeanToCsvBuilder(writer)
                         .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
-                        .withQuoteChar(CSVWriter.NO_QUOTE_CHARACTER)
+                        .withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER)
+                        .withOrderedResults(true)
+                        .withMappingStrategy(strategy)
                         .build();
-
-        csvWriter.writeAll(sData);
+        beanToCsv.write(data);
     }
 }
