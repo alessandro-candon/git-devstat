@@ -2,6 +2,9 @@
 package org.devstat.gitdevstat.command;
 
 import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
@@ -11,6 +14,7 @@ import org.devstat.gitdevstat.git.IGitAnalyzer;
 import org.devstat.gitdevstat.git.NumStatReader;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
 import org.devstat.gitdevstat.support.ThreadExecutor;
+import org.devstat.gitdevstat.utils.ExportUtil;
 import org.devstat.gitdevstat.utils.FsUtil;
 import org.devstat.gitdevstat.view.linesofcodebyauthor.LinesOfCodeByAuthorMerger;
 import org.slf4j.Logger;
@@ -23,11 +27,12 @@ public class GitCommands {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(GitCommands.class);
 
     private final AppProperties appProperties;
-
     private final GitHubClient gitHubClient;
     private final IGitAnalyzer gitAnalyzer;
     private final NumStatReader numStatReader;
     private final FsUtil cleanerUtil;
+
+    private final ExportUtil exportUtil;
 
     public GitCommands(
             AppProperties appProperties,
@@ -35,13 +40,16 @@ public class GitCommands {
             IGitAnalyzer gitAnalyzer,
             NumStatReader numStatReader,
             FsUtil cleanerUtil,
-            GitHubClient gitHubClient) {
+            GitHubClient gitHubClient,
+            ExportUtil exportUtil) {
+
         this.appProperties = appProperties;
         this.threadExecutor = threadExecutor;
         this.gitAnalyzer = gitAnalyzer;
         this.numStatReader = numStatReader;
         this.cleanerUtil = cleanerUtil;
         this.gitHubClient = gitHubClient;
+        this.exportUtil = exportUtil;
     }
 
     private final ThreadExecutor threadExecutor;
@@ -166,6 +174,12 @@ public class GitCommands {
 
         var linesOfCodeByAuthorMerger = new LinesOfCodeByAuthorMerger(this.appProperties);
         var result = linesOfCodeByAuthorMerger.analyze(jobRes);
+
+        try (Writer writer = Files.newBufferedWriter(Paths.get("/tmp/analyze-from-config.csv"))) {
+            exportUtil.serializeToCsv(writer, result);
+        } catch (IOException ioe) {
+            log.error(ioe.getMessage());
+        }
 
         return result.toString();
     }
