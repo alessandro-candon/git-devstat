@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Map;
+import java.util.List;
 import org.devstat.gitdevstat.view.linesofcodebyauthor.LinesOfCodeByAuthorDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,23 +21,25 @@ class ExportUtilTest {
     @Test
     void testCsvExporting() throws Exception {
         // Writer writer = Files.newBufferedWriter(Paths.get("/tmp/test.csv"));
-
         Writer strWriter = new StringWriter();
 
         String exceptRes =
                 """
-                Alexander,1,2
-                Cèsar,2147483647,0
-                ZZZ,0,0
-                """;
+                        "AUTHORID","ADDED","DELETED"
+                        "Alexander","1","2"
+                        "ZZZ","0","0"
+                        "Cèsar","2147483647","0"
+                        """;
 
-        Map<String, LinesOfCodeByAuthorDto> data =
-                Map.of(
-                        "Alexander", new LinesOfCodeByAuthorDto("Alexander", 1, 2),
-                        "ZZZ", new LinesOfCodeByAuthorDto("ZZZ", 0, 0),
-                        "Cèsar", new LinesOfCodeByAuthorDto("Cèsar", Integer.MAX_VALUE, 0));
+        List<LinesOfCodeByAuthorDto> data =
+                List.of(
+                        new LinesOfCodeByAuthorDto("Alexander", 1, 2),
+                        new LinesOfCodeByAuthorDto("ZZZ", 0, 0),
+                        new LinesOfCodeByAuthorDto("Cèsar", Integer.MAX_VALUE, 0));
 
-        exportUtil.serializeToCsv(strWriter, data);
+        String[] order = new String[] {"AUTHORID", "ADDED", "DELETED"};
+
+        exportUtil.serializeToCsv(strWriter, data, order);
 
         assertThat(strWriter).isNotNull();
         assertThat(strWriter.toString()).isEqualTo(exceptRes);
