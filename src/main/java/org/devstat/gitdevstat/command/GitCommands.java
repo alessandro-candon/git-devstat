@@ -64,9 +64,8 @@ public class GitCommands {
         var repositoryDto =
                 new RepositoryDto(1, repoName, repoFullName, Boolean.parseBoolean(isPrivate));
         try {
-            String repoPath = gitAnalyzer.clone(repositoryDto);
+            String repoPath = gitAnalyzer.getLatestInfo(repositoryDto);
             var stats = numStatReader.getCommitStatistics(repoPath);
-            cleanerUtil.clearFolder();
             return stats.toString();
         } catch (Exception e) {
             log.error("", e);
@@ -99,7 +98,7 @@ public class GitCommands {
                     () -> {
                         var repositoryDto =
                                 new RepositoryDto(j, repos[j], reposName[j], arePrivate[j]);
-                        String repoPath = gitAnalyzer.clone(repositoryDto);
+                        String repoPath = gitAnalyzer.getLatestInfo(repositoryDto);
                         var commitStatistics = numStatReader.getCommitStatistics(repoPath);
                         return new GitRepositoryWithCommitResultDto(
                                 repositoryDto, commitStatistics);
@@ -108,9 +107,6 @@ public class GitCommands {
         }
 
         List<GitRepositoryWithCommitResultDto> jobRes = threadExecutor.execute(jobs);
-
-        cleanerUtil.clearFolder();
-
         return jobRes.toString();
     }
 
@@ -133,7 +129,7 @@ public class GitCommands {
         for (RepositoryDto repositoryDto : repositoryDtoMap.values()) {
             IWorkerThreadJob aJob =
                     () -> {
-                        String repoPath = gitAnalyzer.clone(repositoryDto);
+                        String repoPath = gitAnalyzer.getLatestInfo(repositoryDto);
                         var commitStatistics = numStatReader.getCommitStatistics(repoPath);
                         return new GitRepositoryWithCommitResultDto(
                                 repositoryDto, commitStatistics);
@@ -141,9 +137,6 @@ public class GitCommands {
             jobs.add(aJob);
         }
         List<GitRepositoryWithCommitResultDto> jobRes = threadExecutor.execute(jobs);
-
-        cleanerUtil.clearFolder();
-
         return jobRes.toString();
     }
 
@@ -163,7 +156,7 @@ public class GitCommands {
         for (RepositoryDto repositoryDto : repositoryDtoMap.values()) {
             IWorkerThreadJob aJob =
                     () -> {
-                        String repoPath = gitAnalyzer.clone(repositoryDto);
+                        String repoPath = gitAnalyzer.getLatestInfo(repositoryDto);
                         var commitStatistics = numStatReader.getCommitStatistics(repoPath);
                         return new GitRepositoryWithCommitResultDto(
                                 repositoryDto, commitStatistics);
@@ -171,8 +164,6 @@ public class GitCommands {
             jobs.add(aJob);
         }
         List<GitRepositoryWithCommitResultDto> jobRes = threadExecutor.execute(jobs);
-
-        cleanerUtil.clearFolder();
 
         var linesOfCodeByAuthorMerger = new LinesOfCodeByAuthorMerger(this.appProperties);
         var result = linesOfCodeByAuthorMerger.analyze(jobRes);

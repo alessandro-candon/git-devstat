@@ -24,7 +24,7 @@ class NumStatReaderTest extends RepoCleanerSpringBootTest {
     void testParseHistory() throws IOException {
         var repositoryDto =
                 new RepositoryDto(1, "git-devstat", "alessandro-candon/git-devstat", false);
-        String repoPath = gitHubAnalyzer.clone(repositoryDto);
+        String repoPath = gitHubAnalyzer.getLatestInfo(repositoryDto);
         var stats = numStatReader.getCommitStatistics(repoPath);
         var aStat = stats.get("a24802e");
 

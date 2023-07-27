@@ -6,7 +6,7 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("app")
-public record AppProperties(int threadPoolSize, String tmpDir, Github github, Config config) {
+public record AppProperties(int threadPoolSize, String cloneDir, Github github, Config config) {
     public static final String APP_NAME = "gitdevstat";
 
     public record Github(String baseUrl, String org, String pat, String[] teams) {}

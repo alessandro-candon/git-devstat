@@ -19,7 +19,7 @@ public class FsUtil {
 
     public FsUtil(AppProperties appProperties) {
         this.appProperties = appProperties;
-        this.workdir = appProperties.tmpDir() + "/" + APP_NAME;
+        this.workdir = appProperties.cloneDir() + "/" + APP_NAME;
     }
 
     public void clearFolder() throws IOException {

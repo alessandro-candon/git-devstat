@@ -5,6 +5,7 @@ import static org.devstat.gitdevstat.AppProperties.APP_NAME;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
@@ -34,26 +35,34 @@ public class GitHubAnalyzer implements IGitAnalyzer {
      * @param repositoryDto info about repo to be cloned
      * @return null if exception occurred, path of cloned repo otherwise
      */
-    public String clone(RepositoryDto repositoryDto) {
+    public String getLatestInfo(RepositoryDto repositoryDto) {
         log.info(
-                "Cloning repo name: {}, fullname: {}",
+                "Updating repo name: {}, fullname: {}",
                 repositoryDto.name(),
                 repositoryDto.fullName());
         String storeDirPath = getStoreDirPath(repositoryDto);
         String gitPath = "github.com/".concat(repositoryDto.fullName());
+        File storeDir = new File(storeDirPath);
 
         try {
-            File storeDir = new File(storeDirPath);
-            storeDir.mkdirs();
-            int resCode =
-                    execClone(
-                            appProperties.github().pat(),
-                            gitPath,
-                            storeDir,
-                            repositoryDto.isPrivate());
-            log.debug("Clone finished with resultcode: {}", resCode);
+            File gitDir = new File(storeDirPath + "/.git");
+            if (gitDir.isDirectory()
+                    && Arrays.stream(gitDir.list()).anyMatch(p -> p.equals("HEAD"))) {
+                int resCode = execPull(storeDir);
+                log.debug("Pull finished with resultcode: {}", resCode);
+            } else {
+                storeDir.mkdirs();
+                int resCode =
+                        execClone(
+                                appProperties.github().pat(),
+                                gitPath,
+                                storeDir,
+                                repositoryDto.isPrivate());
+                log.debug("Clone finished with resultcode: {}", resCode);
+            }
+
         } catch (IOException | InterruptedException e) {
-            log.error("Error during clone", e);
+            log.error("Error repo update", e);
             return null;
         }
 
@@ -69,15 +78,21 @@ public class GitHubAnalyzer implements IGitAnalyzer {
         return proc.waitFor();
     }
 
+    private int execPull(File destDir) throws IOException, InterruptedException {
+        final String[] realArgs = {"git", "pull"};
+        var proc = Runtime.getRuntime().exec(realArgs, null, destDir.getParentFile());
+        return proc.waitFor();
+    }
+
     public Map<String, GitCommitResultDto> stat(RepositoryDto repositoryDto) throws IOException {
         String repoDirPath = getStoreDirPath(repositoryDto);
         if (!fs.repoFolderExists(repositoryDto)) {
-            repoDirPath = clone(repositoryDto);
+            repoDirPath = getLatestInfo(repositoryDto);
         }
         return numStatReader.getCommitStatistics(repoDirPath);
     }
 
     private String getStoreDirPath(RepositoryDto repositoryDto) {
-        return appProperties.tmpDir() + "/" + APP_NAME + "/" + repositoryDto.name();
+        return appProperties.cloneDir() + "/" + APP_NAME + "/" + repositoryDto.name();
     }
 }
