@@ -37,7 +37,7 @@ public class LinesOfCodeByAuthorMerger {
 
                 var linesOfCodeByAuthorToFIll =
                         linesOfCodeByAuthorDtoHashMap.getOrDefault(
-                                authorId, new LinesOfCodeByAuthorDto());
+                                authorId, new LinesOfCodeByAuthorDto(authorId));
 
                 var linesAddedThisCommit =
                         gitCommitEntry.getValue().statInfoDtoHashMap().values().stream()

@@ -2,15 +2,26 @@
 package org.devstat.gitdevstat.view.linesofcodebyauthor;
 
 public class LinesOfCodeByAuthorDto {
+
+    String authorId;
     int added = 0;
 
     int deleted = 0;
 
     public LinesOfCodeByAuthorDto() {}
 
-    public LinesOfCodeByAuthorDto(int added, int deleted) {
+    public LinesOfCodeByAuthorDto(String authorId) {
+        this.authorId = authorId;
+    }
+
+    public LinesOfCodeByAuthorDto(String authorId, int added, int deleted) {
+        this.authorId = authorId;
         this.added = added;
         this.deleted = deleted;
+    }
+
+    public String getAuthorId() {
+        return authorId;
     }
 
     public int getAdded() {

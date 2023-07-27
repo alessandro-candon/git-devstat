@@ -33,9 +33,9 @@ class ExportUtilTest {
 
         Map<String, LinesOfCodeByAuthorDto> data =
                 Map.of(
-                        "Alexander", new LinesOfCodeByAuthorDto(1, 2),
-                        "ZZZ", new LinesOfCodeByAuthorDto(0, 0),
-                        "Cèsar", new LinesOfCodeByAuthorDto(Integer.MAX_VALUE, 0));
+                        "Alexander", new LinesOfCodeByAuthorDto("Alexander", 1, 2),
+                        "ZZZ", new LinesOfCodeByAuthorDto("ZZZ", 0, 0),
+                        "Cèsar", new LinesOfCodeByAuthorDto("Cèsar", Integer.MAX_VALUE, 0));
 
         exportUtil.serializeToCsv(strWriter, data);
 
