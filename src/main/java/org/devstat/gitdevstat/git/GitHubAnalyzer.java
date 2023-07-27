@@ -3,8 +3,10 @@ package org.devstat.gitdevstat.git;
 
 import static org.devstat.gitdevstat.AppProperties.APP_NAME;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Map;
 import org.devstat.gitdevstat.AppProperties;
@@ -80,8 +82,20 @@ public class GitHubAnalyzer implements IGitAnalyzer {
 
     private int execPull(File destDir) throws IOException, InterruptedException {
         final String[] realArgs = {"git", "pull"};
-        var proc = Runtime.getRuntime().exec(realArgs, null, destDir.getParentFile());
-        return proc.waitFor();
+        var proc = Runtime.getRuntime().exec(realArgs, null, destDir);
+
+        StringBuilder errStream = new StringBuilder();
+        if (log.isDebugEnabled()) {
+            BufferedReader input = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+            String line;
+            while ((line = input.readLine()) != null) errStream.append(line);
+        }
+
+        int res = proc.waitFor();
+
+        if (log.isDebugEnabled() && res != 0) log.error("{}", errStream.toString());
+
+        return res;
     }
 
     public Map<String, GitCommitResultDto> stat(RepositoryDto repositoryDto) throws IOException {
