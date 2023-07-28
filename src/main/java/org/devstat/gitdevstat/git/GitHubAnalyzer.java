@@ -51,7 +51,10 @@ public class GitHubAnalyzer implements IGitAnalyzer {
             if (gitDir.isDirectory()
                     && Arrays.stream(gitDir.list()).anyMatch(p -> p.equals("HEAD"))) {
                 int resCode = execPull(storeDir);
-                log.debug("Pull finished with resultcode: {}", resCode);
+                log.debug(
+                        "Pulling of {} finished with resultcode: {}",
+                        repositoryDto.name(),
+                        resCode);
             } else {
                 storeDir.mkdirs();
                 int resCode =
@@ -60,7 +63,10 @@ public class GitHubAnalyzer implements IGitAnalyzer {
                                 gitPath,
                                 storeDir,
                                 repositoryDto.isPrivate());
-                log.debug("Clone finished with resultcode: {}", resCode);
+                log.debug(
+                        "Cloning of {} finished with resultcode: {}",
+                        repositoryDto.name(),
+                        resCode);
             }
 
         } catch (IOException | InterruptedException e) {

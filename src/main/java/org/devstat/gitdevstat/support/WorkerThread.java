@@ -16,9 +16,9 @@ public class WorkerThread implements Callable<GitRepositoryWithCommitResultDto> 
 
     @Override
     public GitRepositoryWithCommitResultDto call() {
-        log.info("{} Starting...", Thread.currentThread().getName());
+        log.trace("{} Starting...", Thread.currentThread().getName());
         var res = job.processCommand();
-        log.info("{} Finished", Thread.currentThread().getName());
+        log.trace("{} Finished", Thread.currentThread().getName());
         return res;
     }
 }
