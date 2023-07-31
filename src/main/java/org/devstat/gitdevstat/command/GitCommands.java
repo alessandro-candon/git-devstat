@@ -17,7 +17,6 @@ import org.devstat.gitdevstat.git.NumStatReader;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
 import org.devstat.gitdevstat.support.ThreadExecutor;
 import org.devstat.gitdevstat.utils.ExportUtil;
-import org.devstat.gitdevstat.utils.FsUtil;
 import org.devstat.gitdevstat.view.linesofcodebyauthor.LinesOfCodeByAuthorMerger;
 import org.slf4j.Logger;
 import org.springframework.shell.standard.ShellComponent;
@@ -27,12 +26,12 @@ import org.springframework.shell.standard.ShellOption;
 @ShellComponent
 public class GitCommands {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(GitCommands.class);
+    public static final String DEPRECATED = "DEPRECATED";
 
     private final AppProperties appProperties;
     private final GitHubClient gitHubClient;
     private final IGitAnalyzer gitAnalyzer;
     private final NumStatReader numStatReader;
-    private final FsUtil cleanerUtil;
 
     private final ExportUtil exportUtil;
 
@@ -41,7 +40,6 @@ public class GitCommands {
             ThreadExecutor threadExecutor,
             IGitAnalyzer gitAnalyzer,
             NumStatReader numStatReader,
-            FsUtil cleanerUtil,
             GitHubClient gitHubClient,
             ExportUtil exportUtil) {
 
@@ -49,9 +47,12 @@ public class GitCommands {
         this.threadExecutor = threadExecutor;
         this.gitAnalyzer = gitAnalyzer;
         this.numStatReader = numStatReader;
-        this.cleanerUtil = cleanerUtil;
         this.gitHubClient = gitHubClient;
         this.exportUtil = exportUtil;
+    }
+
+    boolean deprecateFilter(RepositoryDto d) {
+        return d.name().indexOf(DEPRECATED) == -1;
     }
 
     private final ThreadExecutor threadExecutor;
@@ -64,9 +65,8 @@ public class GitCommands {
         var repositoryDto =
                 new RepositoryDto(1, repoName, repoFullName, Boolean.parseBoolean(isPrivate));
         try {
-            String repoPath = gitAnalyzer.clone(repositoryDto);
+            String repoPath = gitAnalyzer.getLatestInfo(repositoryDto);
             var stats = numStatReader.getCommitStatistics(repoPath);
-            cleanerUtil.clearFolder();
             return stats.toString();
         } catch (Exception e) {
             log.error("", e);
@@ -99,7 +99,7 @@ public class GitCommands {
                     () -> {
                         var repositoryDto =
                                 new RepositoryDto(j, repos[j], reposName[j], arePrivate[j]);
-                        String repoPath = gitAnalyzer.clone(repositoryDto);
+                        String repoPath = gitAnalyzer.getLatestInfo(repositoryDto);
                         var commitStatistics = numStatReader.getCommitStatistics(repoPath);
                         return new GitRepositoryWithCommitResultDto(
                                 repositoryDto, commitStatistics);
@@ -108,9 +108,6 @@ public class GitCommands {
         }
 
         List<GitRepositoryWithCommitResultDto> jobRes = threadExecutor.execute(jobs);
-
-        cleanerUtil.clearFolder();
-
         return jobRes.toString();
     }
 
@@ -118,8 +115,6 @@ public class GitCommands {
     public String runGithubTeamRepos(@ShellOption String teamNamesCsv) throws IOException {
 
         String[] teamNames = teamNamesCsv.split(",");
-
-        List<IWorkerThreadJob> jobs = new ArrayList<>(teamNames.length);
 
         Map<Integer, RepositoryDto> repositoryDtoMap = new HashMap<>();
 
@@ -130,27 +125,15 @@ public class GitCommands {
             }
         }
 
-        for (RepositoryDto repositoryDto : repositoryDtoMap.values()) {
-            IWorkerThreadJob aJob =
-                    () -> {
-                        String repoPath = gitAnalyzer.clone(repositoryDto);
-                        var commitStatistics = numStatReader.getCommitStatistics(repoPath);
-                        return new GitRepositoryWithCommitResultDto(
-                                repositoryDto, commitStatistics);
-                    };
-            jobs.add(aJob);
-        }
+        List<IWorkerThreadJob> jobs = prepareJobs(repositoryDtoMap);
+
         List<GitRepositoryWithCommitResultDto> jobRes = threadExecutor.execute(jobs);
-
-        cleanerUtil.clearFolder();
-
         return jobRes.toString();
     }
 
     @ShellMethod(key = "analyze-from-config")
-    public String analyzeFromConfig() throws IOException {
+    public String analyzeFromConfig() {
 
-        List<IWorkerThreadJob> jobs = new ArrayList<>(this.appProperties.github().teams().length);
         Map<Integer, RepositoryDto> repositoryDtoMap = new HashMap<>();
 
         for (String teamName : this.appProperties.github().teams()) {
@@ -160,19 +143,8 @@ public class GitCommands {
             }
         }
 
-        for (RepositoryDto repositoryDto : repositoryDtoMap.values()) {
-            IWorkerThreadJob aJob =
-                    () -> {
-                        String repoPath = gitAnalyzer.clone(repositoryDto);
-                        var commitStatistics = numStatReader.getCommitStatistics(repoPath);
-                        return new GitRepositoryWithCommitResultDto(
-                                repositoryDto, commitStatistics);
-                    };
-            jobs.add(aJob);
-        }
+        List<IWorkerThreadJob> jobs = prepareJobs(repositoryDtoMap);
         List<GitRepositoryWithCommitResultDto> jobRes = threadExecutor.execute(jobs);
-
-        cleanerUtil.clearFolder();
 
         var linesOfCodeByAuthorMerger = new LinesOfCodeByAuthorMerger(this.appProperties);
         var result = linesOfCodeByAuthorMerger.analyze(jobRes);
@@ -180,11 +152,29 @@ public class GitCommands {
         String[] order = new String[] {"AUTHORID", "ADDED", "DELETED"};
 
         try (Writer writer = Files.newBufferedWriter(Paths.get("/tmp/analyze-from-config.csv"))) {
-            exportUtil.serializeToCsv(writer, new HashSet<>(result.values()), order);
+            exportUtil.serializeToCsv(writer, result.values(), order);
         } catch (IOException | CsvRequiredFieldEmptyException | CsvDataTypeMismatchException ioe) {
             log.error(ioe.getMessage());
         }
 
         return result.toString();
+    }
+
+    private List<IWorkerThreadJob> prepareJobs(Map<Integer, RepositoryDto> repositoryDtoMap) {
+        List<IWorkerThreadJob> jobs = new ArrayList<>();
+
+        for (RepositoryDto repositoryDto :
+                repositoryDtoMap.values().stream().filter(this::deprecateFilter).toList()) {
+            IWorkerThreadJob aJob =
+                    () -> {
+                        String repoPath = gitAnalyzer.getLatestInfo(repositoryDto);
+                        var commitStatistics = numStatReader.getCommitStatistics(repoPath);
+                        return new GitRepositoryWithCommitResultDto(
+                                repositoryDto, commitStatistics);
+                    };
+            jobs.add(aJob);
+        }
+
+        return jobs;
     }
 }

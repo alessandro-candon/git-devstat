@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.Map;
 import org.devstat.gitdevstat.view.linesofcodebyauthor.LinesOfCodeByAuthorDto;
 import org.junit.jupiter.api.DisplayName;
@@ -40,9 +40,10 @@ class ExportUtilTest {
 
         String[] order = new String[] {"AUTHORID", "ADDED", "DELETED"};
 
-        exportUtil.serializeToCsv(strWriter, new HashSet<>(data.values()), order);
+        exportUtil.serializeToCsv(strWriter, data.values(), order);
 
         assertThat(strWriter).isNotNull();
-        assertThat(strWriter.toString()).isEqualTo(exceptRes);
+        Arrays.stream(exceptRes.split("\n"))
+                .forEach(row -> assertThat(strWriter.toString()).contains(row));
     }
 }

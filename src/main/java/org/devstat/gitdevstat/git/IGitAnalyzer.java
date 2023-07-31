@@ -7,7 +7,7 @@ import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.git.dto.GitCommitResultDto;
 
 public interface IGitAnalyzer {
-    String clone(RepositoryDto repositoryDto);
+    String getLatestInfo(RepositoryDto repositoryDto);
 
     Map<String, GitCommitResultDto> stat(RepositoryDto repositoryDto) throws IOException;
 }
