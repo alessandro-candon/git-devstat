@@ -7,11 +7,13 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.*;
 import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.client.gitprovider.github.GitHubClient;
 import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
+import org.devstat.gitdevstat.git.GitHubAnalyzer;
 import org.devstat.gitdevstat.git.IGitAnalyzer;
 import org.devstat.gitdevstat.git.NumStatReader;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
@@ -136,7 +138,7 @@ public class GitCommands {
 
         Map<Integer, RepositoryDto> repositoryDtoMap = new HashMap<>();
 
-        for (String teamName : this.appProperties.github().teams()) {
+        for (String teamName : appProperties.github().teams()) {
             var repositoryListDto = this.gitHubClient.getRepositoryList(teamName);
             for (RepositoryDto repositoryDto : repositoryListDto) {
                 repositoryDtoMap.put(repositoryDto.id(), repositoryDto);
@@ -150,14 +152,25 @@ public class GitCommands {
         var result = linesOfCodeByAuthorMerger.analyze(jobRes);
 
         String[] order = new String[] {"AUTHORID", "ADDED", "DELETED"};
+        String statFName =
+                getStoreDirPath(repositoryDtoMap)
+                        + "-"
+                        + LocalDateTime.now()
+                        + "-"
+                        + "analyze-from-config.csv";
 
-        try (Writer writer = Files.newBufferedWriter(Paths.get("/tmp/analyze-from-config.csv"))) {
+        try (Writer writer = Files.newBufferedWriter(Paths.get(statFName))) {
             exportUtil.serializeToCsv(writer, result.values(), order);
         } catch (IOException | CsvRequiredFieldEmptyException | CsvDataTypeMismatchException ioe) {
-            log.error(ioe.getMessage());
+            log.error("Error saving stats", ioe);
         }
 
         return result.toString();
+    }
+
+    private String getStoreDirPath(Map<Integer, RepositoryDto> repositoryDtoMap) {
+        return GitHubAnalyzer.getStoreDirPath(
+                appProperties, repositoryDtoMap.values().toArray(new RepositoryDto[0])[0]);
     }
 
     private List<IWorkerThreadJob> prepareJobs(Map<Integer, RepositoryDto> repositoryDtoMap) {
@@ -175,6 +188,6 @@ public class GitCommands {
             jobs.add(aJob);
         }
 
-        return jobs;
+        return jobs.subList(0, 10);
     }
 }

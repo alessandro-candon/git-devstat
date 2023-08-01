@@ -1,14 +1,18 @@
 /* OpenSource 2023 */
 package org.devstat.gitdevstat.view.linesofcodebyauthor;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
 import org.devstat.gitdevstat.git.dto.StatInfoWithPathDto;
+import org.slf4j.Logger;
 
 public class LinesOfCodeByAuthorMerger {
+    private static final Logger log =
+            org.slf4j.LoggerFactory.getLogger(LinesOfCodeByAuthorMerger.class);
 
     private AppProperties appProperties;
 
@@ -18,6 +22,10 @@ public class LinesOfCodeByAuthorMerger {
 
     public Map<String, LinesOfCodeByAuthorDto> analyze(
             List<GitRepositoryWithCommitResultDto> gitRepositoryWithCommitResultDtoList) {
+
+        List<String> excludedFiles = Arrays.asList(appProperties.config().excludedFiles());
+        log.info("Analyzing repo excluding: {}", excludedFiles);
+
         var invertedAndDuplicatedAuthorAndId = new HashMap<String, String>();
 
         for (var authorEntrySet : appProperties.config().authorIds().entrySet()) {
@@ -41,11 +49,27 @@ public class LinesOfCodeByAuthorMerger {
 
                 var linesAddedThisCommit =
                         gitCommitEntry.getValue().statInfoDtoHashMap().values().stream()
+                                .filter(
+                                        f ->
+                                                !excludedFiles.stream()
+                                                        .anyMatch(
+                                                                p ->
+                                                                        f.filePath()
+                                                                                .split("\\t")[2]
+                                                                                .startsWith(p)))
                                 .mapToInt(StatInfoWithPathDto::added)
                                 .sum();
 
                 var linesDeletedThisCommit =
                         gitCommitEntry.getValue().statInfoDtoHashMap().values().stream()
+                                .filter(
+                                        f ->
+                                                !excludedFiles.stream()
+                                                        .anyMatch(
+                                                                p ->
+                                                                        f.filePath()
+                                                                                .split("\\t")[2]
+                                                                                .startsWith(p)))
                                 .mapToInt(StatInfoWithPathDto::deleted)
                                 .sum();
 
