@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.*;
 import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
@@ -181,13 +183,21 @@ public class GitCommands {
             IWorkerThreadJob aJob =
                     () -> {
                         String repoPath = gitAnalyzer.getLatestInfo(repositoryDto);
-                        var commitStatistics = numStatReader.getCommitStatistics(repoPath);
+                        LocalDate from =
+                                appProperties
+                                        .config()
+                                        .timeFrameDto()
+                                        .from()
+                                        .minus(Period.ofDays(1));
+                        LocalDate to = appProperties.config().timeFrameDto().to();
+                        var commitStatistics =
+                                numStatReader.getCommitStatistics(repoPath, from, to);
                         return new GitRepositoryWithCommitResultDto(
                                 repositoryDto, commitStatistics);
                     };
             jobs.add(aJob);
         }
 
-        return jobs.subList(0, 10);
+        return jobs;
     }
 }

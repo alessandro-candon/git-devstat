@@ -54,12 +54,25 @@ app:
             - 44228481+alessandro-candon@users.noreply.github.com
             - alessandro.candon@decathlon.com
             - alexcandy91@hotmail.it
+        pasquale-martucci:
+            - 44227883+pmartu12@users.noreply.github.com
+            - pasqualemartucci@gmail.com
+            - pasquale.martucci@decathlon.com
+            - pasquale.martucci@decathl.com
       excludedFiles:
           - composer.lock
           - package-lock.json
           - .idea
           - bin/
+          - .build
+          - docapi
       timeFrameDto:
-        from: "2023/01/01"
-        to: "2024/01/01"
+        from: "2023-01-01"
+        to: "2024-01-01"
+```
+NB: "from" date is excluded, "to" date is included
+
+Stat command is:
+```
+git log --pretty=format:"commit %h|%an|%ae|%al|%aD|%at|%cn|%ce|%cD|%ct|%f" --numstat --after=2022-12-31 --before=2024-01-01
 ```

@@ -1,7 +1,7 @@
 /* OpenSource 2023 */
 package org.devstat.gitdevstat;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -14,5 +14,5 @@ public record AppProperties(int threadPoolSize, String cloneDir, Github github, 
     public record Config(
             Map<String, String[]> authorIds, String[] excludedFiles, TimeFrame timeFrameDto) {}
 
-    public record TimeFrame(Date from, Date to) {}
+    public record TimeFrame(LocalDate from, LocalDate to) {}
 }

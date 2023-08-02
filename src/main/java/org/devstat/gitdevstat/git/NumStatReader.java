@@ -8,8 +8,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import org.devstat.gitdevstat.git.dto.GitCommitResultDto;
 import org.devstat.gitdevstat.git.dto.StatInfoWithPathDto;
 import org.devstat.gitdevstat.git.utils.MutableInteger;
@@ -40,9 +41,14 @@ public class NumStatReader {
     }
 
     public Map<String, GitCommitResultDto> getCommitStatistics(String repoPath) {
+        return getCommitStatistics(repoPath, null, null);
+    }
+
+    public Map<String, GitCommitResultDto> getCommitStatistics(
+            String repoPath, LocalDate from, LocalDate to) {
         Map<String, GitCommitResultDto> stats = new HashMap<>();
         try {
-            Process proc = prepareProcess(repoPath);
+            Process proc = prepareProcess(repoPath, from, to);
             try (BufferedReader in =
                     new BufferedReader(new InputStreamReader(proc.getInputStream(), ISO_8859_1))) {
                 String formattedLineOfCommit = null;
@@ -78,14 +84,23 @@ public class NumStatReader {
         return stats;
     }
 
-    private Process prepareProcess(String repoPath) throws IOException {
-        final String[] realArgs = {
-            "git",
-            "log",
-            "--pretty=format:commit %h|%an|%ae|%al|%aD|%at|%cn|%ce|%cD|%ct|%f",
-            "--numstat"
-        };
-        var proc = Runtime.getRuntime().exec(realArgs, null, new File(repoPath));
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-yy");
+
+    private Process prepareProcess(String repoPath, LocalDate from, LocalDate to)
+            throws IOException {
+        List<String> args =
+                new ArrayList() {
+                    {
+                        add("git");
+                        add("log");
+                        add("--pretty=format:commit %h|%an|%ae|%al|%aD|%at|%cn|%ce|%cD|%ct|%f");
+                        add("--numstat");
+                        if (from != null) add("--after=" + formatter.format(from));
+                        if (from != to) add("--until=" + formatter.format(to));
+                    }
+                };
+
+        var proc = Runtime.getRuntime().exec(args.toArray(new String[0]), null, new File(repoPath));
         proc.getOutputStream().close();
         proc.getErrorStream().close();
         return proc;
