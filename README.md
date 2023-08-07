@@ -70,7 +70,6 @@ app:
         from: "2023-01-01"
         to: "2024-01-01"
 ```
-NB: "from" date is excluded, "to" date is included
 
 Stat command is:
 ```

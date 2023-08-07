@@ -42,7 +42,7 @@ public class GitHubAnalyzer implements IGitAnalyzer {
                 "Updating repo name: {}, fullname: {}",
                 repositoryDto.name(),
                 repositoryDto.fullName());
-        String storeDirPath = getStoreDirPath(appProperties, repositoryDto);
+        String storeDirPath = getRepoStoreDirPath(appProperties, repositoryDto);
         String gitPath = "github.com/".concat(repositoryDto.fullName());
         File storeDir = new File(storeDirPath);
 
@@ -105,14 +105,19 @@ public class GitHubAnalyzer implements IGitAnalyzer {
     }
 
     public Map<String, GitCommitResultDto> stat(RepositoryDto repositoryDto) {
-        String repoDirPath = getStoreDirPath(appProperties, repositoryDto);
+        String repoDirPath = getRepoStoreDirPath(appProperties, repositoryDto);
         if (!fs.repoFolderExists(repositoryDto)) {
             repoDirPath = getLatestInfo(repositoryDto);
         }
         return numStatReader.getCommitStatistics(repoDirPath);
     }
 
-    public static String getStoreDirPath(AppProperties appProperties, RepositoryDto repositoryDto) {
-        return appProperties.cloneDir() + "/" + APP_NAME + "/" + repositoryDto.name();
+    public static String getRepoStoreDirPath(
+            AppProperties appProperties, RepositoryDto repositoryDto) {
+        return getRootStorePath(appProperties) + "/" + repositoryDto.name();
+    }
+
+    public static String getRootStorePath(AppProperties appProperties) {
+        return appProperties.cloneDir() + "/" + APP_NAME;
     }
 }

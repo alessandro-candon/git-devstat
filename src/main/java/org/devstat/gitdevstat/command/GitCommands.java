@@ -1,6 +1,8 @@
 /* OpenSource 2023 */
 package org.devstat.gitdevstat.command;
 
+import static org.devstat.gitdevstat.git.GitHubAnalyzer.getRootStorePath;
+
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import java.io.IOException;
@@ -15,7 +17,6 @@ import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.client.gitprovider.github.GitHubClient;
 import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
-import org.devstat.gitdevstat.git.GitHubAnalyzer;
 import org.devstat.gitdevstat.git.IGitAnalyzer;
 import org.devstat.gitdevstat.git.NumStatReader;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
@@ -141,11 +142,20 @@ public class GitCommands {
         Map<Integer, RepositoryDto> repositoryDtoMap = new HashMap<>();
 
         for (String teamName : appProperties.github().teams()) {
-            var repositoryListDto = this.gitHubClient.getRepositoryList(teamName);
+            var repositoryListDto = gitHubClient.getRepositoryList(teamName);
             for (RepositoryDto repositoryDto : repositoryListDto) {
                 repositoryDtoMap.put(repositoryDto.id(), repositoryDto);
             }
         }
+
+        var repoCount =
+                repositoryDtoMap.values().stream()
+                        .peek(p -> log.info("* {}", p.name()))
+                        .toList()
+                        .size();
+        log.info("Going to clone/update {} repos", repoCount);
+
+        if (repoCount > 100) return "TOO MANY REPOS!";
 
         List<IWorkerThreadJob> jobs = prepareJobs(repositoryDtoMap);
         List<GitRepositoryWithCommitResultDto> jobRes = threadExecutor.execute(jobs);
@@ -155,8 +165,8 @@ public class GitCommands {
 
         String[] order = new String[] {"AUTHORID", "ADDED", "DELETED"};
         String statFName =
-                getStoreDirPath(repositoryDtoMap)
-                        + "-"
+                getRootStorePath(appProperties)
+                        + "/"
                         + LocalDateTime.now()
                         + "-"
                         + "analyze-from-config.csv";
@@ -168,11 +178,6 @@ public class GitCommands {
         }
 
         return result.toString();
-    }
-
-    private String getStoreDirPath(Map<Integer, RepositoryDto> repositoryDtoMap) {
-        return GitHubAnalyzer.getStoreDirPath(
-                appProperties, repositoryDtoMap.values().toArray(new RepositoryDto[0])[0]);
     }
 
     private List<IWorkerThreadJob> prepareJobs(Map<Integer, RepositoryDto> repositoryDtoMap) {
