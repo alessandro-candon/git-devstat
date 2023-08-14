@@ -35,7 +35,7 @@ analyze false,false,false git-devstat,SpringMicroservice,marketdata-api-js aless
 single-analysis false git-devstat alessandro-candon/git-devstat
 single-analysis false SpringMicroservice cmauri75/SpringMicroservice
 single-analysis false marketdata-api-js barchart/marketdata-api-js
-single-analysis true osm-proxy dktunited/osm-proxy
+single-analysis true osm-proxy asd/osm-proxy
 ```
 
 ### analyze-from-config
@@ -45,20 +45,18 @@ No paramaters are needed, just add application-XXX.yaml as example and run with 
 ```
 app:
   github:
-    #teams: [ "dktrentv2", "data-italy", "ecommerce-italy", "externalsitaly", "gliamministratori", "tacos", "nfs-italy", "shipperbox_italy" ]
-    teams: [ "dktrentv2", "data-italy", "ecommerce-italy", "externalsitaly", "gliamministratori", "tacos" ]
-    #teams: [ "dktrentv2" ]
+    teams: [ "tacos" ]
   config:
       authorIds:
         alessandro-candon:
             - 44228481+alessandro-candon@users.noreply.github.com
-            - alessandro.candon@decathlon.com
+            - alessandro.candon@asd.com
             - alexcandy91@hotmail.it
         pasquale-martucci:
             - 44227883+pmartu12@users.noreply.github.com
             - pasqualemartucci@gmail.com
-            - pasquale.martucci@decathlon.com
-            - pasquale.martucci@decathl.com
+            - pasquale.martucci@asd.com
+            - pasquale.martucci@asd.com
       excludedFiles:
           - composer.lock
           - package-lock.json
