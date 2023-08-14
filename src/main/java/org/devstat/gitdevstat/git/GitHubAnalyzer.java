@@ -42,7 +42,7 @@ public class GitHubAnalyzer implements IGitAnalyzer {
                 "Updating repo name: {}, fullname: {}",
                 repositoryDto.name(),
                 repositoryDto.fullName());
-        String storeDirPath = getStoreDirPath(repositoryDto);
+        String storeDirPath = getRepoStoreDirPath(appProperties, repositoryDto);
         String gitPath = "github.com/".concat(repositoryDto.fullName());
         File storeDir = new File(storeDirPath);
 
@@ -104,15 +104,20 @@ public class GitHubAnalyzer implements IGitAnalyzer {
         return res;
     }
 
-    public Map<String, GitCommitResultDto> stat(RepositoryDto repositoryDto) throws IOException {
-        String repoDirPath = getStoreDirPath(repositoryDto);
+    public Map<String, GitCommitResultDto> stat(RepositoryDto repositoryDto) {
+        String repoDirPath = getRepoStoreDirPath(appProperties, repositoryDto);
         if (!fs.repoFolderExists(repositoryDto)) {
             repoDirPath = getLatestInfo(repositoryDto);
         }
         return numStatReader.getCommitStatistics(repoDirPath);
     }
 
-    private String getStoreDirPath(RepositoryDto repositoryDto) {
-        return appProperties.cloneDir() + "/" + APP_NAME + "/" + repositoryDto.name();
+    public static String getRepoStoreDirPath(
+            AppProperties appProperties, RepositoryDto repositoryDto) {
+        return getRootStorePath(appProperties) + "/" + repositoryDto.name();
+    }
+
+    public static String getRootStorePath(AppProperties appProperties) {
+        return appProperties.cloneDir() + "/" + APP_NAME;
     }
 }

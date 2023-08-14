@@ -1,12 +1,17 @@
 /* OpenSource 2023 */
 package org.devstat.gitdevstat.command;
 
+import static org.devstat.gitdevstat.git.GitHubAnalyzer.getRootStorePath;
+
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.*;
 import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
@@ -136,12 +141,21 @@ public class GitCommands {
 
         Map<Integer, RepositoryDto> repositoryDtoMap = new HashMap<>();
 
-        for (String teamName : this.appProperties.github().teams()) {
-            var repositoryListDto = this.gitHubClient.getRepositoryList(teamName);
+        for (String teamName : appProperties.github().teams()) {
+            var repositoryListDto = gitHubClient.getRepositoryList(teamName);
             for (RepositoryDto repositoryDto : repositoryListDto) {
                 repositoryDtoMap.put(repositoryDto.id(), repositoryDto);
             }
         }
+
+        var repoCount =
+                repositoryDtoMap.values().stream()
+                        .peek(p -> log.info("* {}", p.name()))
+                        .toList()
+                        .size();
+        log.info("Going to clone/update {} repos", repoCount);
+
+        if (repoCount > 100) return "TOO MANY REPOS!";
 
         List<IWorkerThreadJob> jobs = prepareJobs(repositoryDtoMap);
         List<GitRepositoryWithCommitResultDto> jobRes = threadExecutor.execute(jobs);
@@ -150,11 +164,17 @@ public class GitCommands {
         var result = linesOfCodeByAuthorMerger.analyze(jobRes);
 
         String[] order = new String[] {"AUTHORID", "ADDED", "DELETED"};
+        String statFName =
+                getRootStorePath(appProperties)
+                        + "/"
+                        + LocalDateTime.now()
+                        + "-"
+                        + "analyze-from-config.csv";
 
-        try (Writer writer = Files.newBufferedWriter(Paths.get("/tmp/analyze-from-config.csv"))) {
+        try (Writer writer = Files.newBufferedWriter(Paths.get(statFName))) {
             exportUtil.serializeToCsv(writer, result.values(), order);
         } catch (IOException | CsvRequiredFieldEmptyException | CsvDataTypeMismatchException ioe) {
-            log.error(ioe.getMessage());
+            log.error("Error saving stats", ioe);
         }
 
         return result.toString();
@@ -168,7 +188,15 @@ public class GitCommands {
             IWorkerThreadJob aJob =
                     () -> {
                         String repoPath = gitAnalyzer.getLatestInfo(repositoryDto);
-                        var commitStatistics = numStatReader.getCommitStatistics(repoPath);
+                        LocalDate from =
+                                appProperties
+                                        .config()
+                                        .timeFrameDto()
+                                        .from()
+                                        .minus(Period.ofDays(1));
+                        LocalDate to = appProperties.config().timeFrameDto().to();
+                        var commitStatistics =
+                                numStatReader.getCommitStatistics(repoPath, from, to);
                         return new GitRepositoryWithCommitResultDto(
                                 repositoryDto, commitStatistics);
                     };
