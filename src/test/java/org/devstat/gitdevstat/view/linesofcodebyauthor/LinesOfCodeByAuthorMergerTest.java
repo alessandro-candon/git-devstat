@@ -61,7 +61,7 @@ class LinesOfCodeByAuthorMergerTest {
 
     @Test
     void filterTest() {
-        String f1Name = "1\t2\tREADME.md";
+        String f1Name = "1\t2\tcomposerA.lock";
         String f2Name = "10\t20\tsrc/main/java/org/devstat/gitdevstat/AppProperties.java";
         String f3Name = "100\t200\tsrc/main/java/org/devstat/gitdevstat/command/GitCommands.java";
 
@@ -79,12 +79,22 @@ class LinesOfCodeByAuthorMergerTest {
 
         // spotless:off
         assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of(),StatInfoWithPathDto::added)).isEqualTo(111);
-        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of("README.md"),StatInfoWithPathDto::added)).isEqualTo(110);
-        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of("src"),StatInfoWithPathDto::added)).isEqualTo(1);
+        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of("composerA\\.lock","other\\.file"),StatInfoWithPathDto::added)).isEqualTo(110);
+        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of("src"),StatInfoWithPathDto::added)).isEqualTo(111);
+
+        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of("src/main/java/org/devstat/gitdevstat/.*"),StatInfoWithPathDto::added)).isEqualTo(1);
+        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of(".*A.*"),StatInfoWithPathDto::added)).isEqualTo(100);
+        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of(".*GitCommands.java"),StatInfoWithPathDto::added)).isEqualTo(11);
 
         assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of(),StatInfoWithPathDto::deleted)).isEqualTo(222);
-        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of("README.md"),StatInfoWithPathDto::deleted)).isEqualTo(220);
-        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of("src"),StatInfoWithPathDto::deleted)).isEqualTo(2);
+        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of("composerA\\.lock","other\\.file"),StatInfoWithPathDto::deleted)).isEqualTo(220);
+        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of("src"),StatInfoWithPathDto::deleted)).isEqualTo(222);
+
+        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of("src/main/java/org/devstat/gitdevstat/.*"),StatInfoWithPathDto::deleted)).isEqualTo(2);
+        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of(".*A.*"),StatInfoWithPathDto::deleted)).isEqualTo(200);
+        assertThat(linesOfCodeByAuthorMerger.countLines(entry, List.of(".*GitCommands.java"),StatInfoWithPathDto::deleted)).isEqualTo(22);
+
+
         // spotless:on
 
     }

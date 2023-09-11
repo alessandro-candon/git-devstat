@@ -39,9 +39,11 @@ single-analysis true osm-proxy asd/osm-proxy
 ```
 
 ### analyze-from-config
-Note for developer: ``analyze-from-config`` command reads config and analyze all repos referring to a list of teams.
+Notes for developer: 
+* ``analyze-from-config`` command reads config and analyze all repos referring to a list of teams.
+    No paramaters are needed, just add application-XXX.yaml as example and run with profile XXX
 
-No paramaters are needed, just add application-XXX.yaml as example and run with profile XXX
+* add ``logging.level.org.devstat.gitdevstat.view.linesofcodebyauthor=TRACE`` to application.yaml or to runtime env in order to trace all checked files and verify if they are filtered
 ```
 app:
   github:
@@ -59,11 +61,16 @@ app:
             - pasquale.martucci@asd.com
       excludedFiles:
           - composer.lock
+          - package.json
           - package-lock.json
-          - .idea
-          - bin/
-          - .build
-          - docapi
+          - .idea.*
+          - ^bin/.*
+          - ^classes/.*
+          - .*.build.*
+          - docapi.*
+          - phpunit.phar
+          - phpunit.xml.dist
+          - symfony.lock
       timeFrameDto:
         from: "2023-01-01"
         to: "2024-01-01"

@@ -69,10 +69,21 @@ public class LinesOfCodeByAuthorMerger {
             List<String> excludedFiles,
             ToIntFunction<StatInfoWithPathDto> toIntFunctionSupplier) {
         return gitCommitEntry.getValue().statInfoDtoHashMap().values().stream()
+                .peek(
+                        f ->
+                                log.trace(
+                                        "File '{}' has been filtered? {}",
+                                        f.filePath().split("\\t")[2],
+                                        excludedFiles.stream()
+                                                .anyMatch(
+                                                        p ->
+                                                                f.filePath()
+                                                                        .split("\\t")[2]
+                                                                        .matches(p))))
                 .filter(
                         f ->
                                 !excludedFiles.stream()
-                                        .anyMatch(p -> f.filePath().split("\\t")[2].startsWith(p)))
+                                        .anyMatch(p -> f.filePath().split("\\t")[2].matches(p)))
                 .mapToInt(toIntFunctionSupplier)
                 .sum();
     }
