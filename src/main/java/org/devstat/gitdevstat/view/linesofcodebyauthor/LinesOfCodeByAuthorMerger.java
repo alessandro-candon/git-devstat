@@ -5,8 +5,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.ToIntFunction;
 import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
+import org.devstat.gitdevstat.git.dto.GitCommitResultDto;
 import org.devstat.gitdevstat.git.dto.StatInfoWithPathDto;
 import org.slf4j.Logger;
 
@@ -48,30 +50,10 @@ public class LinesOfCodeByAuthorMerger {
                                 authorId, new LinesOfCodeByAuthorDto(authorId));
 
                 var linesAddedThisCommit =
-                        gitCommitEntry.getValue().statInfoDtoHashMap().values().stream()
-                                .filter(
-                                        f ->
-                                                !excludedFiles.stream()
-                                                        .anyMatch(
-                                                                p ->
-                                                                        f.filePath()
-                                                                                .split("\\t")[2]
-                                                                                .startsWith(p)))
-                                .mapToInt(StatInfoWithPathDto::added)
-                                .sum();
+                        countLines(gitCommitEntry, excludedFiles, StatInfoWithPathDto::added);
 
                 var linesDeletedThisCommit =
-                        gitCommitEntry.getValue().statInfoDtoHashMap().values().stream()
-                                .filter(
-                                        f ->
-                                                !excludedFiles.stream()
-                                                        .anyMatch(
-                                                                p ->
-                                                                        f.filePath()
-                                                                                .split("\\t")[2]
-                                                                                .startsWith(p)))
-                                .mapToInt(StatInfoWithPathDto::deleted)
-                                .sum();
+                        countLines(gitCommitEntry, excludedFiles, StatInfoWithPathDto::deleted);
 
                 linesOfCodeByAuthorToFIll.addAddedLines(linesAddedThisCommit);
                 linesOfCodeByAuthorToFIll.addDeletedLines(linesDeletedThisCommit);
@@ -80,5 +62,29 @@ public class LinesOfCodeByAuthorMerger {
             }
         }
         return linesOfCodeByAuthorDtoHashMap;
+    }
+
+    protected int countLines(
+            Map.Entry<String, GitCommitResultDto> gitCommitEntry,
+            List<String> excludedFiles,
+            ToIntFunction<StatInfoWithPathDto> toIntFunctionSupplier) {
+        return gitCommitEntry.getValue().statInfoDtoHashMap().values().stream()
+                .peek(
+                        f ->
+                                log.trace(
+                                        "File '{}' has been filtered? {}",
+                                        f.filePath().split("\\t")[2],
+                                        excludedFiles.stream()
+                                                .anyMatch(
+                                                        p ->
+                                                                f.filePath()
+                                                                        .split("\\t")[2]
+                                                                        .matches(p))))
+                .filter(
+                        f ->
+                                !excludedFiles.stream()
+                                        .anyMatch(p -> f.filePath().split("\\t")[2].matches(p)))
+                .mapToInt(toIntFunctionSupplier)
+                .sum();
     }
 }

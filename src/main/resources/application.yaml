@@ -13,5 +13,6 @@ app:
 
 logging:
   level:
-    org:
-      devstat: DEBUG
+    org: INFO
+    org.devstat.gitdevstat: DEBUG
+    org.devstat.gitdevstat.view.linesofcodebyauthor: TRACE
