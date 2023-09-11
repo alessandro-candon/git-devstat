@@ -36,7 +36,7 @@ class LinesOfCodeByAuthorMergerTest {
                         + " 12:16:00 +0200|1689070560|Cesare Mauri|cesare.mauri@test.com|Tue, 11"
                         + " Jul 2023 12:16:00 +0200|1689070560|Add-netstat-in-main-app";
         var gitCommitResultDto = new GitCommitResultDto.Builder(formattedCommit).build();
-        StatInfoWithPathDto i = new StatInfoWithPathDto("filePath", 1, 1);
+        StatInfoWithPathDto i = new StatInfoWithPathDto("\t1\tfilePath", 1, 1);
         gitCommitResultDto.statInfoDtoHashMap().put("filePath", i);
         resultData.put("e3696af", gitCommitResultDto);
         var gitRepositoryWithCommitResultDto =

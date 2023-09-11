@@ -9,6 +9,7 @@ import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryMapper;
 import org.devstat.gitdevstat.client.gitprovider.github.dto.GithubRepoDto;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,17 +30,21 @@ public class GitHubClient implements IGitProviderClient {
         this.mapper = mapper;
     }
 
+    @Autowired private WebClient webClient;
+
     @Override
     public List<RepositoryDto> getRepositoryList(String teamSlug) {
+
         GithubRepoDto[] githubRepoDtoList =
-                WebClient.create(appProperties.github().baseUrl())
+                webClient
                         .get()
                         .uri(
-                                "/orgs/"
+                                appProperties.github().baseUrl()
+                                        + "/orgs/"
                                         + appProperties.github().org()
                                         + "/teams/"
                                         + teamSlug
-                                        + "/repos")
+                                        + "/repos?per_page=100")
                         .header(HttpHeaders.CONTENT_TYPE, "application/vnd.github+json")
                         .header("X-GitHub-Api-Version", "2022-11-28")
                         .header("Authorization", "token ".concat(appProperties.github().pat()))
@@ -53,7 +58,7 @@ public class GitHubClient implements IGitProviderClient {
 
         assert githubRepoDtoList != null;
 
-        log.debug("Github response: {}", githubRepoDtoList);
+        log.debug("Github response size: {}", githubRepoDtoList.length);
 
         return Arrays.stream(githubRepoDtoList).map(mapper::repositoryToGithubRepo).toList();
     }

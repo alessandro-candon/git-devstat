@@ -3,7 +3,7 @@ package org.devstat.gitdevstat.git.dto;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
+import org.slf4j.Logger;
 
 /**
  * This DTO respond to this fomat and informations format:%h|%an|%ae|%al|%aD|%at|%cn|%ce|%cD|%ct|%f
@@ -35,6 +35,8 @@ public record GitCommitResultDto(
         Map<String, StatInfoWithPathDto> statInfoDtoHashMap) {
 
     public static final class Builder {
+        private static final Logger log =
+                org.slf4j.LoggerFactory.getLogger(GitCommitResultDto.class);
 
         String formattedLog;
 
@@ -43,20 +45,26 @@ public record GitCommitResultDto(
         }
 
         public GitCommitResultDto build() {
-            StringTokenizer st = new StringTokenizer(formattedLog, "|");
-            return new GitCommitResultDto(
-                    st.nextToken(),
-                    st.nextToken(),
-                    st.nextToken(),
-                    st.nextToken(),
-                    st.nextToken(),
-                    Integer.parseInt(st.nextToken()),
-                    st.nextToken(),
-                    st.nextToken(),
-                    st.nextToken(),
-                    Integer.parseInt(st.nextToken()),
-                    st.hasMoreTokens() ? st.nextToken() : "",
-                    new HashMap<>());
+            String[] tokens = formattedLog.split("\\|");
+            try {
+                int i = 0;
+                return new GitCommitResultDto(
+                        tokens[i++],
+                        tokens[i++],
+                        tokens[i++],
+                        tokens[i++],
+                        tokens[i++],
+                        Integer.parseInt(tokens[i++]),
+                        tokens[i++],
+                        tokens[i++],
+                        tokens[i++],
+                        Integer.parseInt(tokens[i++]),
+                        i == tokens.length - 1 ? tokens[i] : "",
+                        new HashMap<>());
+            } catch (Exception e) {
+                log.error("Unable to parse line: {}", formattedLog);
+                return null;
+            }
         }
     }
 }
