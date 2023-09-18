@@ -7,8 +7,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.git.dto.GitCommitResultDto;
@@ -18,6 +18,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GitHubAnalyzer implements IGitAnalyzer {
+
+    private static final AtomicInteger cloneCounter = new AtomicInteger(0);
+
+    private static final Set<String> skippedRepos = Collections.synchronizedSet(new HashSet<>());
+
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(GitHubAnalyzer.class);
 
     private final AppProperties appProperties;
@@ -56,6 +61,15 @@ public class GitHubAnalyzer implements IGitAnalyzer {
                         repositoryDto.name(),
                         resCode);
             } else {
+                int cloned = cloneCounter.incrementAndGet();
+                if (cloned > appProperties.maxRepoClone()) {
+                    log.warn(
+                            "Max number of clone reached, skipping repo {}",
+                            repositoryDto.fullName());
+                    skippedRepos.add(repositoryDto.fullName());
+                    return null;
+                }
+
                 storeDir.mkdirs();
                 int resCode =
                         execClone(
@@ -119,5 +133,9 @@ public class GitHubAnalyzer implements IGitAnalyzer {
 
     public static String getRootStorePath(AppProperties appProperties) {
         return appProperties.cloneDir() + "/" + APP_NAME;
+    }
+
+    public static Set<String> getSkippedRepos() {
+        return skippedRepos;
     }
 }
