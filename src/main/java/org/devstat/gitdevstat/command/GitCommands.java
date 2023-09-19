@@ -17,6 +17,7 @@ import org.devstat.gitdevstat.AppProperties;
 import org.devstat.gitdevstat.client.gitprovider.dto.RepositoryDto;
 import org.devstat.gitdevstat.client.gitprovider.github.GitHubClient;
 import org.devstat.gitdevstat.dto.GitRepositoryWithCommitResultDto;
+import org.devstat.gitdevstat.git.GitHubAnalyzer;
 import org.devstat.gitdevstat.git.IGitAnalyzer;
 import org.devstat.gitdevstat.git.NumStatReader;
 import org.devstat.gitdevstat.support.IWorkerThreadJob;
@@ -155,8 +156,6 @@ public class GitCommands {
                         .size();
         log.info("Going to clone/update {} repos", repoCount);
 
-        if (repoCount > 100) return "TOO MANY REPOS!";
-
         List<IWorkerThreadJob> jobs = prepareJobs(repositoryDtoMap);
         List<GitRepositoryWithCommitResultDto> jobRes = threadExecutor.execute(jobs);
 
@@ -177,7 +176,8 @@ public class GitCommands {
             log.error("Error saving stats", ioe);
         }
 
-        return result.toString();
+        if (GitHubAnalyzer.getSkippedRepos().isEmpty()) return "Analysis completed";
+        else return "Partial analysis executed, skipped: " + GitHubAnalyzer.getSkippedRepos();
     }
 
     private List<IWorkerThreadJob> prepareJobs(Map<Integer, RepositoryDto> repositoryDtoMap) {

@@ -46,6 +46,9 @@ public class NumStatReader {
 
     public Map<String, GitCommitResultDto> getCommitStatistics(
             String repoPath, LocalDate from, LocalDate to) {
+
+        if (repoPath == null) return Map.of();
+
         Map<String, GitCommitResultDto> stats = new HashMap<>();
         try {
             Process proc = prepareProcess(repoPath, from, to);
