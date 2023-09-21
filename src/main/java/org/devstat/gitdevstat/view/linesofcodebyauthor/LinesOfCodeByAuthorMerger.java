@@ -69,22 +69,32 @@ public class LinesOfCodeByAuthorMerger {
             List<String> excludedFiles,
             ToIntFunction<StatInfoWithPathDto> toIntFunctionSupplier) {
         return gitCommitEntry.getValue().statInfoDtoHashMap().values().stream()
-                .peek(
-                        f ->
-                                log.trace(
-                                        "File '{}' has been filtered? {}",
-                                        f.filePath().split("\\t")[2],
-                                        excludedFiles.stream()
-                                                .anyMatch(
-                                                        p ->
-                                                                f.filePath()
-                                                                        .split("\\t")[2]
-                                                                        .matches(p))))
+                .peek(f -> logData(gitCommitEntry.getValue().cn(), f, excludedFiles))
                 .filter(
                         f ->
-                                !excludedFiles.stream()
-                                        .anyMatch(p -> f.filePath().split("\\t")[2].matches(p)))
+                                excludedFiles.stream()
+                                        .noneMatch(p -> f.filePath().split("\\t")[2].matches(p)))
                 .mapToInt(toIntFunctionSupplier)
                 .sum();
+    }
+
+    private void logData(String cn, StatInfoWithPathDto f, List<String> excludedFiles) {
+        if (log.isTraceEnabled()) {
+            Arrays.stream(appProperties.config().inspect())
+                    .filter(insp -> insp.equals(cn) || true)
+                    .findFirst()
+                    .ifPresent(
+                            insp ->
+                                    log.trace(
+                                            "File of user '{}' name: '{}' has been filtered? {}",
+                                            cn,
+                                            f.filePath().split("\\t")[2],
+                                            excludedFiles.stream()
+                                                    .anyMatch(
+                                                            p ->
+                                                                    f.filePath()
+                                                                            .split("\\t")[2]
+                                                                            .matches(p))));
+        }
     }
 }

@@ -44,6 +44,7 @@ Notes for developer:
     No paramaters are needed, just add application-XXX.yaml as example and run with profile XXX
 
 * add ``logging.level.org.devstat.gitdevstat.view.linesofcodebyauthor=TRACE`` to application.yaml or to runtime env in order to trace all checked files and verify if they are filtered
+    also compile "inspect" section to filter users name to be checked
 ```
 app:
   github:
@@ -71,9 +72,14 @@ app:
           - phpunit.phar
           - phpunit.xml.dist
           - symfony.lock
+          - .*swagger.*
       timeFrameDto:
         from: "2023-01-01"
         to: "2024-01-01"
+      inspect:
+        - Cesare Mauri
+        - Ale
+        - Mauro
 ```
 
 Stat command is:
