@@ -13,7 +13,10 @@ public record AppProperties(
     public record Github(String baseUrl, String org, String pat, String[] teams) {}
 
     public record Config(
-            Map<String, String[]> authorIds, String[] excludedFiles, TimeFrame timeFrameDto) {}
+            Map<String, String[]> authorIds,
+            String[] excludedFiles,
+            TimeFrame timeFrameDto,
+            String[] inspect) {}
 
     public record TimeFrame(LocalDate from, LocalDate to) {}
 }

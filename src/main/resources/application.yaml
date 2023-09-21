@@ -5,7 +5,7 @@ spring:
       property-naming-strategy: SNAKE_CASE
 app:
   threadPoolSize: 5
-  maxRepoClone: 20
+  maxRepoClone: 40
   cloneDir: "/tmp"
   github:
     baseUrl: "https://api.github.com"
@@ -16,4 +16,4 @@ logging:
   level:
     org: INFO
     org.devstat.gitdevstat: DEBUG
-    org.devstat.gitdevstat.view.linesofcodebyauthor: DEBUG
+    org.devstat.gitdevstat.view.linesofcodebyauthor: TRACE
