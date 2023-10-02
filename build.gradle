@@ -9,7 +9,7 @@ plugins {
 
 	id 'com.diffplug.spotless' version '6.21.0'
 
-    id 'info.solidsoft.pitest' version '1.9.11'
+    id 'info.solidsoft.pitest' version '1.15.0'
 }
 
 group = 'org.devstat'
